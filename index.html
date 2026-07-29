@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#111312">
+  <meta name="description" content="MEG FITNESS 泰州路店开业免费体验活动">
+  <title>MEG FITNESS 泰州路店｜开业免费体验</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="hero" id="hero">
+    <div class="hero-bg" id="heroBg" aria-hidden="true"></div>
+    <div class="hero-shade"></div>
+    <div class="hero-content wrap">
+      <div><p class="brand" id="brand"></p><p class="eyebrow" id="brandProof"></p></div>
+      <div class="hero-copy">
+        <p class="deadline-pill">领取截止：<span data-deadline></span></p>
+        <h1 id="heroTitle"></h1>
+        <p class="subtitle" id="subtitle"></p>
+        <div class="tags" id="tags"></div>
+        <div class="hero-meta"><span id="hours"></span><span id="distance"></span></div>
+        <button class="btn btn-primary" data-scroll-claim>立即领取免费体验 <span>↓</span></button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="section claim-section" id="claim">
+      <div class="wrap">
+        <p class="section-kicker">OPENING OFFER</p><h2>开业免费体验，任选一项</h2>
+        <p class="muted">仅限新客｜每人限选一项｜名额有限，领完即止</p>
+        <div class="deadline-card">领取截止 <strong data-deadline></strong><span id="countdown"></span></div>
+        <div class="experience-list" id="experienceList"></div>
+        <p class="ended" id="endedMessage" hidden>本期开业免费体验领取已结束</p>
+      </div>
+    </section>
+
+    <section class="section dark-section">
+      <div class="wrap"><p class="section-kicker">THE SPACE</p><h2>你将在这里训练</h2><p class="render-note">空间效果图，最终以门店实际呈现为准</p>
+        <div class="stat-grid"><div><strong>600㎡</strong><span>双层空间</span></div><div><strong>约300㎡</strong><span>自由训练区</span></div><div><strong>7:00—23:00</strong><span>每日开放</span></div><div><strong>2套</strong><span>完整普拉提设备</span></div><div><strong>齐全</strong><span>淋浴·更衣·储物</span></div></div>
+        <div class="gallery" id="gallery" aria-label="门店环境图片横向相册"></div>
+      </div>
+    </section>
+
+    <section class="section"><div class="wrap"><p class="section-kicker">TRAIN YOUR WAY</p><h2>三种训练方式</h2>
+      <div class="training-grid">
+        <article class="content-card featured"><span class="card-no">01</span><h3>自由训练</h3><p>适合已有训练习惯，希望按照自己的时间和计划训练的人。</p><p>配置基础固定器械、龙门架、内收外展及肩背训练设备，满足日常力量、塑形和自主训练需求。</p><b>正式卡种：月卡｜年卡月付｜次卡</b></article>
+        <article class="content-card"><span class="card-no">02</span><h3>塑形私教</h3><p>根据身体状态、训练基础和个人目标制定训练方案。</p><ul><li>减脂塑形</li><li>体态改善</li><li>运动不适训练调整</li><li>力量训练</li><li>运动表现</li></ul></article>
+        <article class="content-card"><span class="card-no">03</span><h3>器械普拉提</h3><p>独立器械普拉提教室，配置两套完整器械。支持一对一训练，或朋友同行一对二训练。</p><ul><li>塑形</li><li>体态改善</li><li>核心控制</li><li>产后体能恢复</li></ul></article>
+      </div>
+    </div></section>
+
+    <section class="section soft-section"><div class="wrap"><p class="section-kicker">WHY MEG</p><h2>为什么选择 MEG FITNESS</h2>
+      <div class="why-grid"><article><strong>10</strong><h3>10年品牌沉淀</h3><p>持续运营10年，泰州路店为品牌第3家实体门店。</p></article><article><strong>PRO</strong><h3>体育专业教练团队</h3><p>具备体育专业或专项训练背景，接受统一培训和考核。</p></article><article><strong>3</strong><h3>三店统一培训体系</h3><p>统一进行教练培训、案例复盘和训练标准更新。</p></article><article><strong>ALL</strong><h3>多种训练方式</h3><p>按训练阶段，在自由训练、塑形私教和普拉提间灵活选择。</p></article></div>
+    </div></section>
+
+    <section class="section location-section"><div class="wrap"><p class="section-kicker">LOCATION</p><h2>离家近，训练更容易坚持</h2>
+      <div class="location-card"><p class="location-name" id="locationName"></p><div id="address"></div><p id="locationDistance"></p><p class="find-tip" id="findTip"></p><p><b>营业时间</b><br><span id="locationHours"></span></p><p class="notice">新客首次开通自由训练体验，以及私教和普拉提体验，均需提前添加店长微信预约。</p><button class="btn btn-outline" id="mapButton">打开地图导航</button><small id="mapHint" hidden>地图定位待补充</small></div>
+    </div></section>
+
+    <section class="section rules-section"><div class="wrap"><p class="section-kicker">TERMS</p><h2>开业免费体验活动规则</h2><ol class="rules" id="rules"></ol><button class="text-button" id="toggleRules" aria-expanded="false">展开完整规则 ＋</button></div></section>
+
+    <section class="section final-cta"><div class="wrap"><p class="section-kicker">READY TO START?</p><h2>先体验，再决定</h2><p>选择适合你的训练方式，添加店长微信完成领取和预约。</p><div class="qr-shell"><img id="footerQr" alt="店长微信二维码"><span class="image-fallback">店长微信二维码<br>待补充</span></div><p><b id="footerManager"></b><br>微信号：<span id="footerWechat"></span></p><button class="btn btn-primary" data-scroll-claim>立即领取免费体验</button><div class="footer-info"><b id="footerStore"></b><span id="footerHours"></span><span id="footerAddress"></span></div></div></section>
+  </main>
+
+  <button class="floating-cta" data-scroll-claim>领取免费体验</button>
+  <div class="modal" id="claimModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-backdrop" data-close-modal></div>
+    <div class="modal-sheet"><div class="drag-handle"></div><button class="close-button" data-close-modal aria-label="关闭弹窗">×</button><p class="section-kicker">CLAIM GUIDE</p><h2 id="modalTitle">领取免费体验</h2><p>你选择的是：<strong id="selectedName"></strong></p>
+      <ol class="claim-steps"><li>点击复制咨询话术</li><li>长按识别店长微信二维码</li><li>添加微信后发送刚刚复制的话术</li><li>获得店长确认后领取成功</li></ol>
+      <div class="message-box" id="messageText"></div><button class="btn btn-primary" id="copyButton">复制咨询话术</button><p class="copy-status" id="copyStatus" aria-live="polite"></p>
+      <div class="manager"><div class="qr-shell"><img id="modalQr" alt="店长微信二维码"><span class="image-fallback">店长微信二维码<br>待补充</span></div><h3 id="managerName"></h3><p>微信号：<b id="managerWechat"></b></p></div>
+      <p class="modal-note">添加微信并获得店长确认后，才视为成功领取。<br>名额按照微信登记及店长确认顺序发放。</p>
+    </div>
+  </div>
+  <script src="config.js"></script><script src="app.js"></script>
+</body>
+</html>
