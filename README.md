@@ -31,7 +31,7 @@ meg-taizhou-h5/
 
 日常会修改的信息集中在 `config.js`：
 
-- 替换门店照片：当前 `assets/` 内使用《泰州路效果图旧.pdf》提取的空间效果图；将正式实拍 WebP 按 `gallery` 中的路径覆盖，或修改对应 `src`。首图为 `assets/hero.webp`。
+- 替换门店照片：当前 `assets/` 内使用《0515-健身房效果图方案.pdf》及电梯厅、走廊效果图；已排除楼梯画面。将正式实拍 WebP 按 `gallery` 中的路径覆盖，或修改对应 `src`。首图为 `assets/hero.webp`。
 - 替换店长二维码：将二维码保存为 `assets/manager-wechat.png`，或修改 `managerQr`。
 - 修改店长姓名和微信号：修改 `managerName`、`managerWechat`。
 - 修改三个项目名额：修改各项目的 `quota`；需要显示剩余数时，将 `showRemaining` 改为 `true` 并更新 `remaining`。剩余数是人工配置，不是实时名额。
@@ -69,7 +69,7 @@ https://example.com/meg-taizhou-h5/?source=coach-liu
 
 ## 正式上线前检查清单
 
-- [ ] 补充并核对店长姓名、微信号和二维码
+- [x] 补充并核对店长姓名、微信号和二维码
 - [ ] 开业实景拍摄完成后，用正式照片替换当前 1 张首屏效果图和 7 张环境效果图
 - [ ] 设置并实机验证地图链接
 - [ ] 确认临时强调色是否替换为正式品牌色
