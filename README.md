@@ -18,8 +18,9 @@ python3 -m http.server 8080
 meg-taizhou-h5/
 ├── index.html       页面语义结构
 ├── styles.css       移动端样式与弹窗样式
-├── app.js           渲染、交互、统计与纯函数
+├── app.js           交互、状态、统计与纯函数
 ├── config.js        门店、活动、项目和素材配置
+├── _headers          Cloudflare Pages 的 HTML 禁止缓存规则
 ├── assets/          门店照片与店长二维码
 ├── tests/
 │   ├── test.html    浏览器测试入口
@@ -29,11 +30,13 @@ meg-taizhou-h5/
 
 ## 内容和素材配置
 
-日常会修改的信息集中在 `config.js`：
+当前静态资源版本号为 `20260730-1`。每次发布新版本时，统一更新 `index.html` 中 CSS/JS/二维码的 `?v=`、`config.js` 的 `assetVersion`，以及测试页资源版本号。
+
+日常会修改的信息集中在 `config.js`；会员价格、店长名称、微信号和二维码直接写在 `index.html`，确保 JavaScript 未加载时仍可见：
 
 - 替换门店照片：当前 `assets/` 内使用《0515-健身房效果图方案.pdf》及电梯厅、走廊效果图；已排除楼梯画面。将正式实拍 WebP 按 `gallery` 中的路径覆盖，或修改对应 `src`。首图为 `assets/hero.webp`。
 - 替换店长二维码：将二维码保存为 `assets/manager-wechat.png`，或修改 `managerQr`。
-- 修改店长姓名和微信号：修改 `managerName`、`managerWechat`。
+- 修改店长姓名、微信号或会员价格：直接修改 `index.html` 中的底部店长区、领取弹窗和会员价格区。
 - 修改三个项目名额：修改各项目的 `quota`；需要显示剩余数时，将 `showRemaining` 改为 `true` 并更新 `remaining`。剩余数是人工配置，不是实时名额。
 - 修改活动截止时间：同时修改带 `+08:00` 的 `deadline` 和展示用 `deadlineText`。
 - 设置地图链接：把腾讯地图、高德地图或其他适合移动端打开的完整链接填入 `mapUrl`。留空时按钮自动禁用并显示“地图定位待补充”。
