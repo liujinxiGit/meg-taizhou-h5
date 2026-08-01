@@ -10,12 +10,12 @@
   <link rel="canonical" href="https://taizhou.jinxiliu.com/">
   <link rel="alternate" hreflang="zh-CN" href="https://taizhou.jinxiliu.com/">
   <link rel="alternate" hreflang="en" href="https://taizhou.jinxiliu.com/en/">
-  <!-- CACHE_VERSION: 20260731-2（发布新版本时同步更新 CSS/JS 查询参数） -->
-  <link rel="stylesheet" href="styles.css?v=20260731-2">
+  <!-- CACHE_VERSION: 20260731-3（发布新版本时同步更新 CSS/JS 查询参数） -->
+  <link rel="stylesheet" href="/styles.css?v=20260731-3">
 </head>
 <body data-language="zh-CN">
   <header class="hero" id="hero">
-    <div class="hero-bg" id="heroBg" style="background-image:url('assets/hero.webp?v=20260731-2')" aria-hidden="true"></div>
+    <div class="hero-bg" id="heroBg" style="background-image:url('assets/hero.webp?v=20260731-3')" aria-hidden="true"></div>
     <div class="hero-shade"></div>
     <div class="hero-content wrap">
       <div class="hero-top"><div><p class="brand" id="brand">MEG FITNESS</p><p class="eyebrow" id="brandProof">10年专业健身品牌｜第3家门店</p></div><nav class="language-switch" aria-label="语言切换"><span aria-current="page">中文</span><i aria-hidden="true">|</i><a href="/en/" data-switch-language>English</a></nav></div>
@@ -25,21 +25,21 @@
         <p class="subtitle" id="subtitle">可以自己练，也可以跟专业教练练</p>
         <div class="tags" id="tags"><span class="tag">自由训练</span><span class="tag">塑形私教</span><span class="tag">器械普拉提</span></div>
         <div class="hero-meta"><span id="hours">每日7:00—23:00</span><span id="distance">武宁路地铁站步行约250m</span></div>
-        <button class="btn btn-primary" data-scroll-claim>立即领取免费体验 <span>↓</span></button>
+        <button class="btn btn-primary js-scroll-to-trials" type="button">立即领取免费体验 <span>↓</span></button>
       </div>
     </div>
   </header>
 
   <main>
-    <section class="section claim-section" id="claim">
+    <section class="section claim-section" id="trial-options">
       <div class="wrap">
         <p class="section-kicker">OPENING OFFER</p><h2>开业免费体验，任选一项</h2>
         <p class="muted">仅限新客｜每人限选一项｜名额有限，领完即止</p>
         <div class="deadline-card">领取截止 <strong data-deadline>2026年9月30日23:00</strong><span id="countdown"></span></div>
         <div class="experience-list" id="experienceList">
-          <article class="experience-card"><div class="experience-head"><div><h3>自由训练体验周卡</h3><p class="quota">限50份</p></div><span class="number-badge">01</span></div><ul><li>首次到店开通后连续7个自然日有效</li><li>每天不限进入次数</li><li>可使用7:00—23:00全部开放时段</li><li>首次开通需要提前预约</li></ul><button class="btn btn-primary claim-button" data-id="free_training">我要领取自由训练周卡</button></article>
-          <article class="experience-card"><div class="experience-head"><div><h3>塑形私教体验课</h3><p class="quota">限20份</p></div><span class="number-badge">02</span></div><ul><li>50分钟一对一私教体验</li><li>包含目标沟通和针对性体验训练</li><li>适合减脂塑形、体态改善和科学训练指导</li></ul><button class="btn btn-primary claim-button" data-id="personal_training">我要预约塑形私教体验</button></article>
-          <article class="experience-card"><div class="experience-head"><div><h3>器械普拉提体验课</h3><p class="quota">限20份</p></div><span class="number-badge">03</span></div><ul><li>50分钟一对一器械普拉提体验</li><li>适合塑形、体态改善、核心控制和产后体能恢复</li><li>与朋友共同预约时，可以自愿选择一对二体验</li></ul><button class="btn btn-primary claim-button" data-id="pilates">我要预约器械普拉提体验</button></article>
+          <article class="experience-card"><div class="experience-head"><div><h3>自由训练体验周卡</h3><p class="quota">限50份</p></div><span class="number-badge">01</span></div><ul><li>首次到店开通后连续7个自然日有效</li><li>每天不限进入次数</li><li>可使用7:00—23:00全部开放时段</li><li>首次开通需要提前预约</li></ul><button class="btn btn-primary claim-button js-claim-experience" type="button" data-experience="open-gym" data-language="zh-CN">我要领取自由训练周卡</button></article>
+          <article class="experience-card"><div class="experience-head"><div><h3>塑形私教体验课</h3><p class="quota">限20份</p></div><span class="number-badge">02</span></div><ul><li>50分钟一对一私教体验</li><li>包含目标沟通和针对性体验训练</li><li>适合减脂塑形、体态改善和科学训练指导</li></ul><button class="btn btn-primary claim-button js-claim-experience" type="button" data-experience="personal-training" data-language="zh-CN">我要预约塑形私教体验</button></article>
+          <article class="experience-card"><div class="experience-head"><div><h3>器械普拉提体验课</h3><p class="quota">限20份</p></div><span class="number-badge">03</span></div><ul><li>50分钟一对一器械普拉提体验</li><li>适合塑形、体态改善、核心控制和产后体能恢复</li><li>与朋友共同预约时，可以自愿选择一对二体验</li></ul><button class="btn btn-primary claim-button js-claim-experience" type="button" data-experience="pilates" data-language="zh-CN">我要预约器械普拉提体验</button></article>
         </div>
         <p class="ended" id="endedMessage" hidden>本期开业免费体验领取已结束</p>
       </div>
@@ -49,15 +49,15 @@
       <div class="wrap"><p class="section-kicker">THE SPACE</p><h2>你将在这里训练</h2><p class="render-note">空间效果图，最终以门店实际呈现为准</p>
         <div class="stat-grid"><div><strong>600㎡</strong><span>双层空间</span></div><div><strong>约300㎡</strong><span>自由训练区</span></div><div><strong>7:00—23:00</strong><span>每日开放</span></div><div><strong>2套</strong><span>完整普拉提设备</span></div><div><strong>齐全</strong><span>淋浴·更衣·储物</span></div></div>
         <div class="gallery" id="gallery" aria-label="门店环境图片横向相册">
-          <figure class="gallery-card"><img src="assets/elevator.webp?v=20260731-2" alt="电梯厅" data-gallery-index="0"><figcaption class="gallery-label">电梯厅</figcaption></figure>
-          <figure class="gallery-card"><img src="assets/corridor.webp?v=20260731-2" alt="入店走廊" data-gallery-index="1"><figcaption class="gallery-label">入店走廊</figcaption></figure>
-          <figure class="gallery-card"><img src="assets/gym-1.webp?v=20260731-2" alt="自由训练区" data-gallery-index="2"><figcaption class="gallery-label">自由训练区</figcaption></figure>
-          <figure class="gallery-card"><img src="assets/gym-2.webp?v=20260731-2" alt="力量器械区" data-gallery-index="3"><figcaption class="gallery-label">力量器械区</figcaption></figure>
-          <figure class="gallery-card"><img src="assets/gym-3.webp?v=20260731-2" alt="综合训练区" data-gallery-index="4"><figcaption class="gallery-label">综合训练区</figcaption></figure>
-          <figure class="gallery-card"><img src="assets/pilates-1.webp?v=20260731-2" alt="器械普拉提教室" data-gallery-index="5"><figcaption class="gallery-label">器械普拉提教室</figcaption></figure>
-          <figure class="gallery-card"><img src="assets/pilates-2.webp?v=20260731-2" alt="普拉提设备" data-gallery-index="6"><figcaption class="gallery-label">普拉提设备</figcaption></figure>
-          <figure class="gallery-card"><img src="assets/changing-room.webp?v=20260731-2" alt="更衣与储物空间" data-gallery-index="7"><figcaption class="gallery-label">更衣与储物空间</figcaption></figure>
-          <figure class="gallery-card"><img src="assets/shower.webp?v=20260731-2" alt="淋浴空间" data-gallery-index="8"><figcaption class="gallery-label">淋浴空间</figcaption></figure>
+          <figure class="gallery-card"><img src="assets/elevator.webp?v=20260731-3" alt="电梯厅" data-gallery-index="0"><figcaption class="gallery-label">电梯厅</figcaption></figure>
+          <figure class="gallery-card"><img src="assets/corridor.webp?v=20260731-3" alt="入店走廊" data-gallery-index="1"><figcaption class="gallery-label">入店走廊</figcaption></figure>
+          <figure class="gallery-card"><img src="assets/gym-1.webp?v=20260731-3" alt="自由训练区" data-gallery-index="2"><figcaption class="gallery-label">自由训练区</figcaption></figure>
+          <figure class="gallery-card"><img src="assets/gym-2.webp?v=20260731-3" alt="力量器械区" data-gallery-index="3"><figcaption class="gallery-label">力量器械区</figcaption></figure>
+          <figure class="gallery-card"><img src="assets/gym-3.webp?v=20260731-3" alt="综合训练区" data-gallery-index="4"><figcaption class="gallery-label">综合训练区</figcaption></figure>
+          <figure class="gallery-card"><img src="assets/pilates-1.webp?v=20260731-3" alt="器械普拉提教室" data-gallery-index="5"><figcaption class="gallery-label">器械普拉提教室</figcaption></figure>
+          <figure class="gallery-card"><img src="assets/pilates-2.webp?v=20260731-3" alt="普拉提设备" data-gallery-index="6"><figcaption class="gallery-label">普拉提设备</figcaption></figure>
+          <figure class="gallery-card"><img src="assets/changing-room.webp?v=20260731-3" alt="更衣与储物空间" data-gallery-index="7"><figcaption class="gallery-label">更衣与储物空间</figcaption></figure>
+          <figure class="gallery-card"><img src="assets/shower.webp?v=20260731-3" alt="淋浴空间" data-gallery-index="8"><figcaption class="gallery-label">淋浴空间</figcaption></figure>
         </div>
       </div>
     </section>
@@ -102,19 +102,19 @@
 
     <section class="section rules-section"><div class="wrap"><p class="section-kicker">TERMS</p><h2>开业免费体验活动规则</h2><ol class="rules" id="rules"><li>本活动仅限首次体验MEG FITNESS泰州路店的新客参与。</li><li>每位用户可在自由训练体验周卡、50分钟塑形私教一对一体验课、50分钟器械普拉提一对一体验课中任选一项。</li><li>每位用户限领取一次，三项体验不可重复领取、叠加、转赠或兑换现金。</li><li>免费体验领取截止时间为2026年9月30日23:00。</li><li>用户添加店长微信、发送对应领取话术并获得店长确认后，视为领取成功。</li><li>领取成功后，需在14个自然日内完成首次到店体验或首次开通。超过14个自然日未使用，体验资格自动失效。</li><li>自由训练体验周卡自首次到店开通时生效，连续7个自然日有效。</li><li>自由训练周卡有效期内每天不限进入次数，可使用门店7:00—23:00全部开放时段。</li><li>例如用户于9月1日任意时间首次开通自由训练周卡，周卡可使用至9月7日门店当日营业结束。</li><li>自由训练体验首次开通需提前预约，并在工作人员在场时完成登记、设施介绍及入场说明。</li><li>塑形私教体验课和器械普拉提体验课均为50分钟一对一课程。</li><li>具体教练及体验时间以门店预约安排为准。</li><li>普拉提体验用户如与朋友共同预约，可在双方自愿的情况下选择一对二体验。</li><li>免费体验名额分别为：自由训练体验周卡50份、塑形私教体验课20份、器械普拉提体验课20份。</li><li>名额按照添加微信、发送领取话术及店长确认的先后顺序发放，领完即止。</li><li>本活动仅适用于MEG FITNESS泰州路店，其他门店不参与。</li><li>门店可根据设备维护、教练排班和现场安全情况，对部分预约时间进行合理调整。</li></ol><button class="text-button" id="toggleRules" aria-expanded="false">展开完整规则 ＋</button></div></section>
 
-    <section class="section final-cta"><div class="wrap"><p class="section-kicker">READY TO START?</p><h2>先体验，再决定</h2><p>选择适合你的训练方式，添加店长微信完成领取和预约。</p><div class="qr-shell"><img id="footerQr" src="assets/manager-wechat.png?v=20260731-2" alt="店长微信二维码"><span class="image-fallback">店长微信二维码</span></div><p><b id="footerManager">MEG FITNESS 店长</b><br>微信号：<span id="footerWechat">13101839816</span></p><button class="btn btn-primary" data-scroll-claim>立即领取免费体验</button><div class="footer-info"><b id="footerStore">MEG FITNESS 泰州路店</b><span id="footerHours">每日7:00—23:00</span><span id="footerAddress">泰州路与余姚路交界 · 余姚路派出所对面二楼</span></div></div></section>
+    <section class="section final-cta"><div class="wrap"><p class="section-kicker">READY TO START?</p><h2>先体验，再决定</h2><p>选择适合你的训练方式，添加店长微信完成领取和预约。</p><div class="qr-shell"><img id="footerQr" src="assets/manager-wechat.png?v=20260731-3" alt="店长微信二维码"><span class="image-fallback">店长微信二维码</span></div><p><b id="footerManager">MEG FITNESS 店长</b><br>微信号：<span id="footerWechat">13101839816</span></p><button class="btn btn-primary js-scroll-to-trials" type="button">立即领取免费体验</button><div class="footer-info"><b id="footerStore">MEG FITNESS 泰州路店</b><span id="footerHours">每日7:00—23:00</span><span id="footerAddress">泰州路与余姚路交界 · 余姚路派出所对面二楼</span></div></div></section>
   </main>
 
-  <button class="floating-cta" data-scroll-claim>领取免费体验</button>
-  <div class="modal" id="claimModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <button class="floating-cta js-scroll-to-trials" type="button">领取免费体验</button>
+  <div class="modal" id="claimModal" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal-backdrop" data-close-modal></div>
     <div class="modal-sheet"><div class="drag-handle"></div><button class="close-button" data-close-modal aria-label="关闭弹窗">×</button><p class="section-kicker">CLAIM GUIDE</p><h2 id="modalTitle">领取免费体验</h2><p>你选择的是：<strong id="selectedName"></strong></p>
       <ol class="claim-steps"><li>点击复制咨询话术</li><li>长按识别店长微信二维码</li><li>添加微信后发送刚刚复制的话术</li><li>获得店长确认后领取成功</li></ol>
-      <div class="message-box" id="messageText"></div><button class="btn btn-primary" id="copyButton">复制咨询话术</button><p class="copy-status" id="copyStatus" aria-live="polite"></p>
-      <div class="manager"><div class="qr-shell"><img id="modalQr" src="assets/manager-wechat.png?v=20260731-2" alt="店长微信二维码"><span class="image-fallback">店长微信二维码</span></div><h3 id="managerName">MEG FITNESS 店长</h3><p>微信号：<b id="managerWechat">13101839816</b></p></div>
+      <div class="message-box" id="messageText"></div><button class="btn btn-primary" id="copyButton" type="button">复制咨询话术</button><p class="copy-status" id="copyStatus" aria-live="polite"></p>
+      <div class="manager"><div class="qr-shell"><img id="modalQr" src="assets/manager-wechat.png?v=20260731-3" alt="店长微信二维码"><span class="image-fallback">店长微信二维码</span></div><h3 id="managerName">MEG FITNESS 店长</h3><p>微信号：<b id="managerWechat">13101839816</b></p></div>
       <p class="modal-note">添加微信并获得店长确认后，才视为成功领取。<br>名额按照微信登记及店长确认顺序发放。</p>
     </div>
   </div>
-  <script src="config.js?v=20260731-2"></script><script src="app.js?v=20260731-2"></script>
+  <script defer src="/config.js?v=20260731-3"></script><script defer src="/app.js?v=20260731-3"></script>
 </body>
 </html>

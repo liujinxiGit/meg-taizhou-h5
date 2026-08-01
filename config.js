@@ -1,5 +1,5 @@
 window.MEG_CONFIG = {
-  assetVersion: "20260731-2",
+  assetVersion: "20260731-3",
   brandName: "MEG FITNESS",
   storeName: "MEG FITNESS 泰州路店",
   brandProof: "10年专业健身品牌｜第3家门店",
@@ -15,17 +15,17 @@ window.MEG_CONFIG = {
   redemptionDays: 14,
   showRemaining: false,
   accentColor: "#b8ff3d",
-  heroImage: "assets/hero.webp?v=20260731-2",
+  heroImage: "assets/hero.webp?v=20260731-3",
   gallery: [
-    { src: "assets/elevator.webp?v=20260731-2", label: "电梯厅" },
-    { src: "assets/corridor.webp?v=20260731-2", label: "入店走廊" },
-    { src: "assets/gym-1.webp?v=20260731-2", label: "自由训练区" },
-    { src: "assets/gym-2.webp?v=20260731-2", label: "力量器械区" },
-    { src: "assets/gym-3.webp?v=20260731-2", label: "综合训练区" },
-    { src: "assets/pilates-1.webp?v=20260731-2", label: "器械普拉提教室" },
-    { src: "assets/pilates-2.webp?v=20260731-2", label: "普拉提设备" },
-    { src: "assets/changing-room.webp?v=20260731-2", label: "更衣与储物空间" },
-    { src: "assets/shower.webp?v=20260731-2", label: "淋浴空间" }
+    { src: "assets/elevator.webp?v=20260731-3", label: "电梯厅" },
+    { src: "assets/corridor.webp?v=20260731-3", label: "入店走廊" },
+    { src: "assets/gym-1.webp?v=20260731-3", label: "自由训练区" },
+    { src: "assets/gym-2.webp?v=20260731-3", label: "力量器械区" },
+    { src: "assets/gym-3.webp?v=20260731-3", label: "综合训练区" },
+    { src: "assets/pilates-1.webp?v=20260731-3", label: "器械普拉提教室" },
+    { src: "assets/pilates-2.webp?v=20260731-3", label: "普拉提设备" },
+    { src: "assets/changing-room.webp?v=20260731-3", label: "更衣与储物空间" },
+    { src: "assets/shower.webp?v=20260731-3", label: "淋浴空间" }
   ],
   experiences: [
     {

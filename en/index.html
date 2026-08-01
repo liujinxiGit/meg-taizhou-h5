@@ -10,11 +10,11 @@
   <link rel="canonical" href="https://taizhou.jinxiliu.com/en/">
   <link rel="alternate" hreflang="zh-CN" href="https://taizhou.jinxiliu.com/">
   <link rel="alternate" hreflang="en" href="https://taizhou.jinxiliu.com/en/">
-  <link rel="stylesheet" href="../styles.css?v=20260731-2">
+  <link rel="stylesheet" href="/styles.css?v=20260731-3">
 </head>
 <body class="lang-en" data-language="en" data-copy-success="Message Copied" data-copy-failure="Copy failed. Please press and hold the message to copy it." data-countdown-ended="This opening offer has ended.">
   <header class="hero" id="hero">
-    <div class="hero-bg" id="heroBg" style="background-image:url('../assets/hero.webp?v=20260731-2')" aria-hidden="true"></div>
+    <div class="hero-bg" id="heroBg" style="background-image:url('../assets/hero.webp?v=20260731-3')" aria-hidden="true"></div>
     <div class="hero-shade"></div>
     <div class="hero-content wrap">
       <div class="hero-top">
@@ -27,20 +27,20 @@
         <p class="subtitle">Train independently, or work with a professional coach when you need guidance.</p>
         <div class="tags"><span class="tag">Open Gym</span><span class="tag">Personal Training</span><span class="tag">Reformer Pilates</span></div>
         <div class="hero-meta"><span>Open Daily · 7:00 AM–11:00 PM</span><span>About 250 m from Wuning Road Metro Station</span></div>
-        <div class="hero-actions"><button class="btn btn-primary" data-scroll-claim>Claim Your Free Trial</button><button class="btn btn-secondary-light" data-scroll-membership>View Open Gym Memberships</button></div>
+        <div class="hero-actions"><button class="btn btn-primary js-scroll-to-trials" type="button">Claim Your Free Trial</button><button class="btn btn-secondary-light" type="button" data-scroll-membership>View Open Gym Memberships</button></div>
       </div>
     </div>
   </header>
 
   <main>
-    <section class="section claim-section" id="claim"><div class="wrap">
+    <section class="section claim-section" id="trial-options"><div class="wrap">
       <p class="section-kicker">OPENING OFFER</p><h2>Choose One Free Opening Trial</h2>
       <p class="muted">For new members only.<br>One trial per person. Limited availability.</p>
       <div class="deadline-card">Claim deadline <strong>September 30, 2026 · 11:00 PM</strong><span id="countdown"></span></div>
       <div class="experience-list">
-        <article class="experience-card"><div class="experience-head"><div><h3>7-Day Open Gym Trial</h3><p class="quota">Limited to 50 spots</p></div><span class="number-badge">01</span></div><ul><li>Valid for 7 consecutive calendar days after activation</li><li>Unlimited entries during the valid period</li><li>Access during all opening hours: 7:00 AM–11:00 PM</li><li>First-time activation must be booked in advance</li></ul><button class="btn btn-primary claim-button" data-id="open_gym" data-event="select_open_gym" data-name="7-Day Open Gym Trial" data-message="Hi, I found MEG FITNESS Taizhou Road through the opening promotion. I would like to claim the 7-day Open Gym trial.">Claim the 7-Day Open Gym Trial</button></article>
-        <article class="experience-card"><div class="experience-head"><div><h3>50-Minute Personal Training Trial</h3><p class="quota">Limited to 20 spots</p></div><span class="number-badge">02</span></div><ul><li>One-on-one session</li><li>Includes a brief goal and training needs consultation</li><li>Suitable for fat loss, body shaping, posture improvement and strength training</li></ul><button class="btn btn-primary claim-button" data-id="personal_training" data-event="select_personal_training" data-name="50-Minute Personal Training Trial" data-message="Hi, I found MEG FITNESS Taizhou Road through the opening promotion. I would like to book the Personal Training trial.">Book a Personal Training Trial</button></article>
-        <article class="experience-card"><div class="experience-head"><div><h3>50-Minute Reformer Pilates Trial</h3><p class="quota">Limited to 20 spots</p></div><span class="number-badge">03</span></div><ul><li>One-on-one Reformer Pilates session</li><li>Suitable for body shaping, posture, core control and postnatal fitness</li><li>Two friends may choose a 1-on-2 session together</li></ul><button class="btn btn-primary claim-button" data-id="pilates" data-event="select_pilates" data-name="50-Minute Reformer Pilates Trial" data-message="Hi, I found MEG FITNESS Taizhou Road through the opening promotion. I would like to book the Reformer Pilates trial.">Book a Reformer Pilates Trial</button></article>
+        <article class="experience-card"><div class="experience-head"><div><h3>7-Day Open Gym Trial</h3><p class="quota">Limited to 50 spots</p></div><span class="number-badge">01</span></div><ul><li>Valid for 7 consecutive calendar days after activation</li><li>Unlimited entries during the valid period</li><li>Access during all opening hours: 7:00 AM–11:00 PM</li><li>First-time activation must be booked in advance</li></ul><button class="btn btn-primary claim-button js-claim-experience" type="button" data-experience="open-gym" data-language="en">Claim the 7-Day Open Gym Trial</button></article>
+        <article class="experience-card"><div class="experience-head"><div><h3>50-Minute Personal Training Trial</h3><p class="quota">Limited to 20 spots</p></div><span class="number-badge">02</span></div><ul><li>One-on-one session</li><li>Includes a brief goal and training needs consultation</li><li>Suitable for fat loss, body shaping, posture improvement and strength training</li></ul><button class="btn btn-primary claim-button js-claim-experience" type="button" data-experience="personal-training" data-language="en">Book a Personal Training Trial</button></article>
+        <article class="experience-card"><div class="experience-head"><div><h3>50-Minute Reformer Pilates Trial</h3><p class="quota">Limited to 20 spots</p></div><span class="number-badge">03</span></div><ul><li>One-on-one Reformer Pilates session</li><li>Suitable for body shaping, posture, core control and postnatal fitness</li><li>Two friends may choose a 1-on-2 session together</li></ul><button class="btn btn-primary claim-button js-claim-experience" type="button" data-experience="pilates" data-language="en">Book a Reformer Pilates Trial</button></article>
       </div>
       <p class="ended" id="endedMessage" hidden>This opening offer has ended.</p>
     </div></section>
@@ -69,7 +69,7 @@
         <article class="price-card"><div><h3>Annual Membership</h3></div><div class="price-value"><span>¥</span><strong>2,699</strong><small>/ year</small></div></article>
       </div>
       <p class="price-note">Membership details and activation requirements are subject to confirmation with the gym manager.</p>
-      <button class="btn btn-primary message-button membership-message-button" data-id="open_gym_membership" data-event="click_open_gym_membership" data-name="Open Gym Memberships" data-message="Hi, I would like to ask about the Open Gym membership options at MEG FITNESS Taizhou Road.">Ask About Open Gym Memberships</button>
+      <button class="btn btn-primary message-button membership-message-button js-open-gym-membership" type="button">Ask About Open Gym Memberships</button>
     </div></section>
 
     <section class="section trial-process-section"><div class="wrap">
@@ -90,14 +90,14 @@
     <section class="section dark-section"><div class="wrap">
       <p class="section-kicker">THE SPACE</p><h2>Take a Look Inside</h2><p class="render-note">Design renderings. The completed space may vary.</p>
       <div class="gallery" aria-label="Gym facilities">
-        <figure class="gallery-card"><img src="../assets/hero.webp?v=20260731-2" alt="Open Training Area" data-gallery-index="0"><figcaption class="gallery-label">Open Training Area</figcaption></figure>
-        <figure class="gallery-card"><img src="../assets/gym-1.webp?v=20260731-2" alt="Strength Equipment" data-gallery-index="1"><figcaption class="gallery-label">Strength Equipment</figcaption></figure>
-        <figure class="gallery-card"><img src="../assets/gym-2.webp?v=20260731-2" alt="Cable Station" data-gallery-index="2"><figcaption class="gallery-label">Cable Station</figcaption></figure>
-        <figure class="gallery-card"><img src="../assets/changing-room.webp?v=20260731-2" alt="Changing Area" data-gallery-index="3"><figcaption class="gallery-label">Changing Area</figcaption></figure>
-        <figure class="gallery-card"><img src="../assets/shower.webp?v=20260731-2" alt="Shower Area" data-gallery-index="4"><figcaption class="gallery-label">Shower Area</figcaption></figure>
-        <figure class="gallery-card"><img src="../assets/elevator.webp?v=20260731-2" alt="Elevator Lobby" data-gallery-index="5"><figcaption class="gallery-label">Elevator Lobby</figcaption></figure>
-        <figure class="gallery-card"><img src="../assets/corridor.webp?v=20260731-2" alt="Entrance Corridor" data-gallery-index="6"><figcaption class="gallery-label">Entrance Corridor</figcaption></figure>
-        <figure class="gallery-card"><img src="../assets/pilates-1.webp?v=20260731-2" alt="Private Pilates Room" data-gallery-index="7"><figcaption class="gallery-label">Private Pilates Room</figcaption></figure>
+        <figure class="gallery-card"><img src="../assets/hero.webp?v=20260731-3" alt="Open Training Area" data-gallery-index="0"><figcaption class="gallery-label">Open Training Area</figcaption></figure>
+        <figure class="gallery-card"><img src="../assets/gym-1.webp?v=20260731-3" alt="Strength Equipment" data-gallery-index="1"><figcaption class="gallery-label">Strength Equipment</figcaption></figure>
+        <figure class="gallery-card"><img src="../assets/gym-2.webp?v=20260731-3" alt="Cable Station" data-gallery-index="2"><figcaption class="gallery-label">Cable Station</figcaption></figure>
+        <figure class="gallery-card"><img src="../assets/changing-room.webp?v=20260731-3" alt="Changing Area" data-gallery-index="3"><figcaption class="gallery-label">Changing Area</figcaption></figure>
+        <figure class="gallery-card"><img src="../assets/shower.webp?v=20260731-3" alt="Shower Area" data-gallery-index="4"><figcaption class="gallery-label">Shower Area</figcaption></figure>
+        <figure class="gallery-card"><img src="../assets/elevator.webp?v=20260731-3" alt="Elevator Lobby" data-gallery-index="5"><figcaption class="gallery-label">Elevator Lobby</figcaption></figure>
+        <figure class="gallery-card"><img src="../assets/corridor.webp?v=20260731-3" alt="Entrance Corridor" data-gallery-index="6"><figcaption class="gallery-label">Entrance Corridor</figcaption></figure>
+        <figure class="gallery-card"><img src="../assets/pilates-1.webp?v=20260731-3" alt="Private Pilates Room" data-gallery-index="7"><figcaption class="gallery-label">Private Pilates Room</figcaption></figure>
       </div>
     </div></section>
 
@@ -112,8 +112,8 @@
 
     <section class="section final-cta contact-section"><div class="wrap">
       <p class="section-kicker">WECHAT CONTACT</p><h2>Contact the Gym Manager</h2><p>Scan the QR code in WeChat, or add the WeChat ID below.</p>
-      <div class="qr-shell"><img id="footerQr" src="../assets/manager-wechat.png?v=20260731-2" alt="Gym Manager WeChat QR code"><span class="image-fallback">WeChat QR code</span></div>
-      <p><b>Gym Manager</b><br>WeChat: <span>13101839816</span></p><button class="btn btn-primary" data-scroll-claim>Claim Your Free Trial</button>
+      <div class="qr-shell"><img id="footerQr" src="../assets/manager-wechat.png?v=20260731-3" alt="Gym Manager WeChat QR code"><span class="image-fallback">WeChat QR code</span></div>
+      <p><b>Gym Manager</b><br>WeChat: <span>13101839816</span></p><button class="btn btn-primary js-scroll-to-trials" type="button">Claim Your Free Trial</button>
       <div class="footer-info"><b>MEG FITNESS Taizhou Road</b><span>Open Daily · 7:00 AM–11:00 PM</span><span>Taizhou Road &amp; Yuyao Road · Jing’an, Shanghai</span></div>
     </div></section>
 
@@ -124,16 +124,16 @@
     </div></section>
   </main>
 
-  <button class="floating-cta" data-scroll-claim>Claim Your Free Trial</button>
-  <div class="modal" id="claimModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <button class="floating-cta js-scroll-to-trials" type="button">Claim Your Free Trial</button>
+  <div class="modal" id="claimModal" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal-backdrop" data-close-modal></div>
     <div class="modal-sheet"><div class="drag-handle"></div><button class="close-button" data-close-modal aria-label="Close">×</button><p class="section-kicker">WECHAT MESSAGE</p><h2 id="modalTitle">Contact the Gym Manager</h2><p>Your selection: <strong id="selectedName"></strong></p>
       <ol class="claim-steps"><li>Copy the prepared message below.</li><li>Scan the Gym Manager’s WeChat QR code.</li><li>Add the Gym Manager and send the message.</li><li>Your trial is confirmed after you receive a reply.</li></ol>
-      <div class="message-box" id="messageText"></div><button class="btn btn-primary" id="copyButton">Copy Message</button><p class="copy-status" id="copyStatus" aria-live="polite"></p>
-      <div class="manager"><div class="qr-shell"><img id="modalQr" src="../assets/manager-wechat.png?v=20260731-2" alt="Gym Manager WeChat QR code"><span class="image-fallback">WeChat QR code</span></div><h3>Gym Manager</h3><p>WeChat: <b>13101839816</b></p></div>
+      <div class="message-box" id="messageText"></div><button class="btn btn-primary" id="copyButton" type="button">Copy Message</button><p class="copy-status" id="copyStatus" aria-live="polite"></p>
+      <div class="manager"><div class="qr-shell"><img id="modalQr" src="../assets/manager-wechat.png?v=20260731-3" alt="Gym Manager WeChat QR code"><span class="image-fallback">WeChat QR code</span></div><h3>Gym Manager</h3><p>WeChat: <b>13101839816</b></p></div>
       <p class="modal-note">A trial is successfully claimed only after confirmation from the Gym Manager. Spots are allocated in confirmation order.</p>
     </div>
   </div>
-  <script src="../config.js?v=20260731-2"></script><script src="../app.js?v=20260731-2"></script>
+  <script defer src="/config.js?v=20260731-3"></script><script defer src="/app.js?v=20260731-3"></script>
 </body>
 </html>
