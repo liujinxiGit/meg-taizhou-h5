@@ -27,8 +27,8 @@ const checks = [
   ["English titles and messages are present", ["7-Day Open Gym Trial", "Personal Training Trial", "Reformer Pilates Trial", "I would like to claim the 7-day Open Gym trial.", "I would like to book the Personal Training trial.", "I would like to book the Reformer Pilates trial."].every(text => app.includes(text))],
   ["Clipboard fallback is present", app.includes('document.createElement("textarea")') && app.includes('document.execCommand("copy")')],
   ["Copy success messages are exact", app.includes("话术已复制，请添加店长微信并发送") && app.includes("Message copied. Please add the gym manager on WeChat and send it.")],
-  ["English root resources cannot resolve under /en/", en.includes('href="/styles.css?v=20260731-3"') && en.includes('src="/config.js?v=20260731-3"') && en.includes('src="/app.js?v=20260731-3"') && !/src="(?:\.\/)?app\.js/.test(en)],
-  ["Scripts defer until the DOM is ready", /<script defer src="\/config\.js\?v=20260731-3"><\/script><script defer src="\/app\.js\?v=20260731-3"><\/script>/.test(zh) && /<script defer src="\/config\.js\?v=20260731-3"><\/script><script defer src="\/app\.js\?v=20260731-3"><\/script>/.test(en) && app.includes('document.addEventListener("DOMContentLoaded", init')],
+  ["English root resources cannot resolve under /en/", en.includes('href="/styles.css?v=20260802-2"') && en.includes('src="/config.js?v=20260802-2"') && en.includes('src="/app.js?v=20260802-2"') && !/src="(?:\.\/)?app\.js/.test(en)],
+  ["Scripts defer until the DOM is ready", /<script defer src="\/config\.js\?v=20260802-2"><\/script><script defer src="\/app\.js\?v=20260802-2"><\/script>/.test(zh) && /<script defer src="\/config\.js\?v=20260802-2"><\/script><script defer src="\/app\.js\?v=20260802-2"><\/script>/.test(en) && app.includes('document.addEventListener("DOMContentLoaded", init')],
   ["App tolerates a missing config object", app.includes("root.MEG_CONFIG || {}")],
   ["English membership inquiry uses delegated interaction", en.includes("js-open-gym-membership") && app.includes('target.closest(".js-open-gym-membership")')]
 ];

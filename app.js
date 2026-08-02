@@ -39,6 +39,27 @@
     }
   };
 
+  var CONSULTATION_CONTENT = {
+    "zh-CN": {
+      "physical-reconditioning": { title:"物理重建咨询", message:"你好，我从MEG FITNESS泰州路店活动网页进入，想咨询【物理重建】课程。" },
+      weightlifting: { title:"举重训练咨询", message:"你好，我从MEG FITNESS泰州路店活动网页进入，想咨询【举重训练】课程。" },
+      "sports-performance": { title:"运动表现咨询", message:"你好，我从MEG FITNESS泰州路店活动网页进入，想咨询【运动表现】课程。" },
+      boxing: { title:"拳击训练咨询", message:"你好，我从MEG FITNESS泰州路店活动网页进入，想咨询【拳击训练】课程。" },
+      "youth-fitness": { title:"青少儿体适能咨询", message:"你好，我从MEG FITNESS泰州路店活动网页进入，想咨询【青少儿体适能】课程。" },
+      "group-classes": { title:"团体课程咨询", message:"你好，我从MEG FITNESS泰州路店活动网页进入，想咨询【团体课程】最新课表。" },
+      recovery: { title:"拉伸恢复咨询", message:"你好，我从MEG FITNESS泰州路店活动网页进入，想咨询【拉伸恢复】课程。" }
+    },
+    en: {
+      "physical-reconditioning": { title:"Physical Reconditioning Inquiry", message:"Hi, I found MEG FITNESS Taizhou Road through the website. I would like to ask about the Physical Reconditioning sessions." },
+      weightlifting: { title:"Olympic Weightlifting Inquiry", message:"Hi, I found MEG FITNESS Taizhou Road through the website. I would like to ask about the Olympic Weightlifting sessions." },
+      "sports-performance": { title:"Sports Performance Inquiry", message:"Hi, I found MEG FITNESS Taizhou Road through the website. I would like to ask about the Sports Performance sessions." },
+      boxing: { title:"Boxing Training Inquiry", message:"Hi, I found MEG FITNESS Taizhou Road through the website. I would like to ask about the Boxing Training sessions." },
+      "youth-fitness": { title:"Youth Fitness Inquiry", message:"Hi, I found MEG FITNESS Taizhou Road through the website. I would like to ask about the Youth Fitness sessions." },
+      "group-classes": { title:"Group Classes Inquiry", message:"Hi, I found MEG FITNESS Taizhou Road through the website. I would like to ask about the latest Group Classes schedule." },
+      recovery: { title:"Mobility & Recovery Inquiry", message:"Hi, I found MEG FITNESS Taizhou Road through the website. I would like to ask about the Mobility & Recovery sessions." }
+    }
+  };
+
   function parseSource(search) {
     try { return new URLSearchParams(search || "").get("source") || "direct"; }
     catch (error) { return "direct"; }
@@ -101,9 +122,10 @@
       if (!storage) return false;
       try { return Boolean(storage.getItem(key)); } catch (error) { return false; }
     }
-    function trackEvent(name) {
+    function trackEvent(name, details) {
       var logs = safeGet("eventLogs", []);
       var event = createEvent(name, source, undefined, pageLanguage);
+      Object.keys(details || {}).forEach(function (key) { event[key] = details[key]; });
       logs.push(event);
       if (logs.length > 200) logs = logs.slice(-200);
       safeSet("eventLogs", logs);
@@ -128,8 +150,16 @@
 
     var modal = document.getElementById("claimModal");
     var modalSheet = modal ? modal.querySelector(".modal-sheet") : null;
+    var imagePreview = document.getElementById("imagePreview");
+    var imagePreviewImg = document.getElementById("imagePreviewImg");
     var touchStartY = 0;
     var expired = isExpired(deadline);
+    var goalSelectorOpened = false;
+
+    var coachSection = document.querySelector('[data-config-section="coach"]');
+    var locationsSection = document.querySelector('[data-config-section="locations"]');
+    if (coachSection) coachSection.hidden = config.showCoachSection !== true;
+    if (locationsSection) locationsSection.hidden = config.showLocationsSection === false;
 
     function experienceEvent(experience) {
       if (experience === "open-gym") return pageLanguage === "en" ? "select_open_gym" : "select_free_training";
@@ -181,11 +211,49 @@
       trackEvent("view_wechat_qr");
     }
 
+    function openConsultationModal(topic, language) {
+      var normalizedLanguage = normalizeLanguage(language);
+      var content = CONSULTATION_CONTENT[normalizedLanguage] && CONSULTATION_CONTENT[normalizedLanguage][topic];
+      if (!modal || !content) {
+        if (!modal && root.console && root.console.error) root.console.error("Claim modal not found");
+        return;
+      }
+      currentExperience = topic;
+      currentClaimMessage = content.message;
+      setText("selectedName", content.title);
+      setText("messageText", content.message);
+      setText("copyStatus", "");
+      modal.hidden = false;
+      modal.classList.add("open");
+      modal.setAttribute("aria-hidden", "false");
+      body.classList.add("no-scroll");
+      trackEvent("view_wechat_qr");
+    }
+
     function closeModal() {
       if (!modal) return;
       modal.classList.remove("open");
       modal.setAttribute("aria-hidden", "true");
       modal.hidden = true;
+      body.classList.remove("no-scroll");
+    }
+
+    function openImagePreview(trigger) {
+      if (!imagePreview || !imagePreviewImg) return;
+      imagePreviewImg.src = trigger.dataset.previewSrc || "";
+      imagePreviewImg.alt = trigger.dataset.previewAlt || "";
+      imagePreview.hidden = false;
+      imagePreview.classList.add("open");
+      imagePreview.setAttribute("aria-hidden", "false");
+      body.classList.add("no-scroll");
+    }
+
+    function closeImagePreview() {
+      if (!imagePreview || !imagePreviewImg) return;
+      imagePreview.classList.remove("open");
+      imagePreview.setAttribute("aria-hidden", "true");
+      imagePreview.hidden = true;
+      imagePreviewImg.removeAttribute("src");
       body.classList.remove("no-scroll");
     }
 
@@ -251,6 +319,108 @@
         return;
       }
 
+      var programButton = target.closest(".js-program-toggle");
+      if (programButton) {
+        event.preventDefault();
+        var programId = programButton.dataset.program;
+        var programButtons = document.querySelectorAll(".js-program-toggle");
+        var programDetails = document.querySelectorAll("[data-program-detail]");
+        var wasExpanded = programButton.getAttribute("aria-expanded") === "true";
+        programButtons.forEach(function (button) {
+          button.setAttribute("aria-expanded", "false");
+          button.classList.remove("active");
+        });
+        programDetails.forEach(function (detail) { detail.hidden = true; });
+        if (!wasExpanded) {
+          var programDetail = document.querySelector('[data-program-detail="' + programId + '"]');
+          programButton.setAttribute("aria-expanded", "true");
+          programButton.classList.add("active");
+          if (programDetail) programDetail.hidden = false;
+        }
+        trackEvent("training_program_selected", { program:programId });
+        return;
+      }
+
+      var goalButton = target.closest(".js-goal-button");
+      if (goalButton) {
+        event.preventDefault();
+        var goal = goalButton.dataset.goal || "";
+        var recommendedService = goalButton.dataset.recommendedService || "";
+        if (!goalSelectorOpened) {
+          goalSelectorOpened = true;
+          trackEvent("goal_selector_open", { goal:goal, recommended_service:recommendedService });
+        }
+        document.querySelectorAll(".js-goal-button").forEach(function (button) {
+          var selected = button === goalButton;
+          button.classList.toggle("active", selected);
+          button.setAttribute("aria-pressed", String(selected));
+        });
+        document.querySelectorAll("[data-goal-result]").forEach(function (result) {
+          result.hidden = result.dataset.goalResult !== goal;
+        });
+        trackEvent("goal_selected", { goal:goal, recommended_service:recommendedService });
+        return;
+      }
+
+      var goalCta = target.closest(".js-goal-cta");
+      if (goalCta) {
+        event.preventDefault();
+        var ctaGoal = goalCta.dataset.goal || "";
+        var ctaService = goalCta.dataset.recommendedService || goalCta.dataset.experience || goalCta.dataset.consultation || "";
+        trackEvent("goal_recommendation_cta", { goal:ctaGoal, recommended_service:ctaService });
+        if (goalCta.dataset.consultation) openConsultationModal(goalCta.dataset.consultation, goalCta.dataset.language || pageLanguage);
+        else openClaimModal(goalCta.dataset.experience, goalCta.dataset.language || pageLanguage);
+        return;
+      }
+
+      var coachToggle = target.closest(".js-coach-toggle");
+      if (coachToggle) {
+        event.preventDefault();
+        var coachDetails = document.getElementById(coachToggle.getAttribute("aria-controls"));
+        var coachExpanded = coachToggle.getAttribute("aria-expanded") !== "true";
+        coachToggle.setAttribute("aria-expanded", String(coachExpanded));
+        if (coachDetails) coachDetails.hidden = !coachExpanded;
+        coachToggle.textContent = coachExpanded
+          ? (coachToggle.dataset.collapseLabel || "收起专业背景")
+          : (coachToggle.dataset.expandLabel || "查看专业背景");
+        if (coachExpanded) trackEvent("coach_profile_expanded", { coach_id:coachToggle.dataset.coachId || "manager" });
+        return;
+      }
+
+      var locationToggle = target.closest(".js-location-toggle");
+      if (locationToggle) {
+        event.preventDefault();
+        var locationDetails = document.getElementById(locationToggle.getAttribute("aria-controls"));
+        var locationExpanded = locationToggle.getAttribute("aria-expanded") !== "true";
+        locationToggle.setAttribute("aria-expanded", String(locationExpanded));
+        if (locationDetails) locationDetails.hidden = !locationExpanded;
+        locationToggle.textContent = locationExpanded
+          ? (locationToggle.dataset.collapseLabel || "收起门店详情")
+          : (locationToggle.dataset.expandLabel || "查看门店详情");
+        if (locationExpanded) trackEvent("location_card_expanded", { location_id:locationToggle.dataset.locationId || "" });
+        return;
+      }
+
+      var locationMap = target.closest(".js-location-map");
+      if (locationMap) {
+        trackEvent("location_map_clicked", { location_id:locationMap.dataset.locationId || "" });
+        return;
+      }
+
+      var imageTrigger = target.closest(".js-image-preview");
+      if (imageTrigger) {
+        event.preventDefault();
+        if (imageTrigger.classList.contains("is-fallback")) return;
+        openImagePreview(imageTrigger);
+        return;
+      }
+
+      if (target.closest("[data-close-image-preview]")) {
+        event.preventDefault();
+        closeImagePreview();
+        return;
+      }
+
       if (target.closest("#copyButton")) {
         event.preventDefault();
         copyCurrentMessage();
@@ -273,7 +443,10 @@
     });
 
     document.addEventListener("keydown", function (event) {
-      if (event.key === "Escape") closeModal();
+      if (event.key === "Escape") {
+        closeModal();
+        closeImagePreview();
+      }
     });
     if (modalSheet) {
       modalSheet.addEventListener("touchstart", function (event) { if (event.touches[0]) touchStartY = event.touches[0].clientY; }, { passive:true });
@@ -282,6 +455,10 @@
 
     document.querySelectorAll("[data-gallery-index]").forEach(function (img) {
       img.addEventListener("error", function () { imageFallback(img); });
+    });
+    document.querySelectorAll("[data-fallback-image]").forEach(function (img) {
+      img.addEventListener("error", function () { imageFallback(img); });
+      if (img.complete && !img.naturalWidth) imageFallback(img);
     });
     ["modalQr", "footerQr"].forEach(function (id) {
       var image = document.getElementById(id);
@@ -316,6 +493,20 @@
       toggle.setAttribute("aria-expanded", String(expanded));
       if (expanded) trackEvent("expand_rules");
     });
+
+    var timeline = document.querySelector("[data-brand-timeline]");
+    if (timeline && "IntersectionObserver" in root) {
+      var timelineObserver = new root.IntersectionObserver(function (entries) {
+        if (entries.some(function (entry) { return entry.isIntersecting; })) {
+          timeline.classList.add("viewed");
+          trackEvent("timeline_viewed");
+          timelineObserver.disconnect();
+        }
+      }, { threshold:0.2 });
+      timelineObserver.observe(timeline);
+    } else if (timeline) {
+      timeline.classList.add("viewed");
+    }
 
     if (expired) {
       document.querySelectorAll(".js-claim-experience").forEach(function (button) { button.disabled = true; });

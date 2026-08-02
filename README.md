@@ -36,7 +36,7 @@ meg-taizhou-h5/
 
 ## 内容和素材配置
 
-当前静态资源版本号为 `20260731-3`。每次发布新版本时，统一更新中英文 `index.html` 中 CSS/JS/图片的 `?v=`、`config.js` 的 `assetVersion`，以及测试页资源版本号。
+当前静态资源版本号为 `20260802-2`。每次发布新版本时，统一更新中英文 `index.html` 中 CSS/JS/图片的 `?v=`、`config.js` 的 `assetVersion`，以及测试页资源版本号。
 
 日常会修改的信息集中在 `config.js`；会员价格、店长名称、微信号和二维码直接写在 `index.html`，确保 JavaScript 未加载时仍可见：
 
@@ -49,6 +49,21 @@ meg-taizhou-h5/
 - 修改品牌强调色：修改 `accentColor`；当前颜色仅为临时视觉强调色，并非未经确认的品牌色。
 
 图片缺失时页面会自动显示灰色文字占位，不会出现 broken image 图标。建议首屏图控制在 300 KB 内，相册单图控制在 200 KB 内；按实际展示尺寸裁切，使用 WebP，二维码保留 PNG 并确保边缘清晰。
+
+### 教练与三店图片
+
+教练照片已经按页面比例处理为 WebP，可直接替换同名文件：
+
+- `assets/coach-xu.webp`：教练主照片，4:5 竖图，推荐 1000 × 1250 px。
+- `assets/coach-xu-training.webp`：训练教学照片，3:2 横图，推荐 1200 × 800 px；4:3 横图也可使用。
+
+三家门店照片预留以下路径，建议统一使用 4:3 横图、1200 × 900 px：
+
+- `assets/location-pac.webp`
+- `assets/location-wuding.webp`
+- `assets/location-taizhou.webp`
+
+替换时覆盖对应同名文件即可。WebP 推荐质量 75—85，并尽量将单张文件控制在 200 KB 内。若照片路径不存在，页面会显示带门店名称的品牌风格占位卡，不会显示破图；上线新照片后仍应升级全站 `?v=` 版本号，避免微信继续读取旧缓存。
 
 ## 来源链接与宣传单二维码
 
