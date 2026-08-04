@@ -152,9 +152,36 @@
     var modalSheet = modal ? modal.querySelector(".modal-sheet") : null;
     var imagePreview = document.getElementById("imagePreview");
     var imagePreviewImg = document.getElementById("imagePreviewImg");
+    var toast = document.getElementById("toast");
+    var mobileCtaBar = document.querySelector(".mobile-cta-bar");
     var touchStartY = 0;
+    var previewTouchStartY = 0;
+    var savedScrollY = 0;
+    var toastTimer = 0;
     var expired = isExpired(deadline);
     var goalSelectorOpened = false;
+
+    function showToast(message) {
+      if (!toast || !message) return;
+      root.clearTimeout(toastTimer);
+      toast.textContent = message;
+      toast.classList.add("show");
+      toastTimer = root.setTimeout(function () { toast.classList.remove("show"); }, 2100);
+    }
+
+    function lockPage() {
+      if (body.classList.contains("no-scroll")) return;
+      savedScrollY = root.pageYOffset || document.documentElement.scrollTop || 0;
+      body.style.top = "-" + savedScrollY + "px";
+      body.classList.add("no-scroll");
+    }
+
+    function unlockPage() {
+      if ((modal && modal.classList.contains("open")) || (imagePreview && imagePreview.classList.contains("open"))) return;
+      body.classList.remove("no-scroll");
+      body.style.top = "";
+      root.scrollTo(0, savedScrollY);
+    }
 
     var coachSection = document.querySelector('[data-config-section="coach"]');
     var locationsSection = document.querySelector('[data-config-section="locations"]');
@@ -183,7 +210,7 @@
       modal.hidden = false;
       modal.classList.add("open");
       modal.setAttribute("aria-hidden", "false");
-      body.classList.add("no-scroll");
+      lockPage();
       trackEvent(experienceEvent(experience));
       trackEvent("view_wechat_qr");
       root.setTimeout(function () {
@@ -206,7 +233,7 @@
       modal.hidden = false;
       modal.classList.add("open");
       modal.setAttribute("aria-hidden", "false");
-      body.classList.add("no-scroll");
+      lockPage();
       trackEvent("click_open_gym_membership");
       trackEvent("view_wechat_qr");
     }
@@ -226,7 +253,7 @@
       modal.hidden = false;
       modal.classList.add("open");
       modal.setAttribute("aria-hidden", "false");
-      body.classList.add("no-scroll");
+      lockPage();
       trackEvent("view_wechat_qr");
     }
 
@@ -235,7 +262,7 @@
       modal.classList.remove("open");
       modal.setAttribute("aria-hidden", "true");
       modal.hidden = true;
-      body.classList.remove("no-scroll");
+      unlockPage();
     }
 
     function openImagePreview(trigger) {
@@ -245,7 +272,7 @@
       imagePreview.hidden = false;
       imagePreview.classList.add("open");
       imagePreview.setAttribute("aria-hidden", "false");
-      body.classList.add("no-scroll");
+      lockPage();
     }
 
     function closeImagePreview() {
@@ -254,7 +281,7 @@
       imagePreview.setAttribute("aria-hidden", "true");
       imagePreview.hidden = true;
       imagePreviewImg.removeAttribute("src");
-      body.classList.remove("no-scroll");
+      unlockPage();
     }
 
     async function copyText(value) {
@@ -287,9 +314,12 @@
           : "话术已复制，请添加店长微信并发送";
         var failure = body.dataset.copyFailure || (pageLanguage === "en" ? "Copy failed. Please copy the message manually." : "复制失败，请长按上方话术手动复制。");
         setText("copyStatus", copied ? success : failure);
+        showToast(copied ? (pageLanguage === "en" ? "Message Copied" : "话术已复制") : failure);
         if (copied) trackEvent("copy_message");
       }).catch(function () {
-        setText("copyStatus", pageLanguage === "en" ? "Copy failed. Please copy the message manually." : "复制失败，请长按上方话术手动复制。");
+        var failure = pageLanguage === "en" ? "Copy failed. Please copy the message manually." : "复制失败，请长按上方话术手动复制。";
+        setText("copyStatus", failure);
+        showToast(failure);
       });
     }
 
@@ -308,6 +338,12 @@
       if (scrollButton) {
         event.preventDefault();
         trackEvent("click_claim_main");
+        if (scrollButton.classList.contains("floating-cta") && currentExperience) {
+          if (currentExperience === "open-gym-membership") openMembershipModal();
+          else if (EXPERIENCE_CONTENT[pageLanguage] && EXPERIENCE_CONTENT[pageLanguage][currentExperience]) openClaimModal(currentExperience, pageLanguage);
+          else openConsultationModal(currentExperience, pageLanguage);
+          return;
+        }
         var trialOptions = document.querySelector("#trial-options");
         if (trialOptions) trialOptions.scrollIntoView({ behavior:"smooth" });
         return;
@@ -335,7 +371,12 @@
           var programDetail = document.querySelector('[data-program-detail="' + programId + '"]');
           programButton.setAttribute("aria-expanded", "true");
           programButton.classList.add("active");
-          if (programDetail) programDetail.hidden = false;
+          if (programDetail) {
+            programDetail.hidden = false;
+            root.setTimeout(function () {
+              if (root.matchMedia && root.matchMedia("(max-width: 767px)").matches) programDetail.scrollIntoView({ behavior:"smooth", block:"nearest" });
+            }, 40);
+          }
         }
         trackEvent("training_program_selected", { program:programId });
         return;
@@ -407,6 +448,23 @@
         return;
       }
 
+      var faqToggle = target.closest(".js-faq-toggle");
+      if (faqToggle) {
+        event.preventDefault();
+        var faqAnswer = document.getElementById(faqToggle.getAttribute("aria-controls"));
+        var faqExpanded = faqToggle.getAttribute("aria-expanded") === "true";
+        document.querySelectorAll(".js-faq-toggle").forEach(function (button) {
+          button.setAttribute("aria-expanded", "false");
+          var answer = document.getElementById(button.getAttribute("aria-controls"));
+          if (answer) answer.hidden = true;
+        });
+        if (!faqExpanded) {
+          faqToggle.setAttribute("aria-expanded", "true");
+          if (faqAnswer) faqAnswer.hidden = false;
+        }
+        return;
+      }
+
       var imageTrigger = target.closest(".js-image-preview");
       if (imageTrigger) {
         event.preventDefault();
@@ -424,6 +482,15 @@
       if (target.closest("#copyButton")) {
         event.preventDefault();
         copyCurrentMessage();
+        return;
+      }
+
+      var copyWechatButton = target.closest("#copyWechatButton");
+      if (copyWechatButton) {
+        event.preventDefault();
+        copyText(copyWechatButton.dataset.wechat || "13101839816").then(function (copied) {
+          showToast(copied ? (pageLanguage === "en" ? "WeChat ID Copied" : "微信号已复制") : (pageLanguage === "en" ? "Copy failed" : "复制失败"));
+        });
         return;
       }
 
@@ -452,6 +519,10 @@
       modalSheet.addEventListener("touchstart", function (event) { if (event.touches[0]) touchStartY = event.touches[0].clientY; }, { passive:true });
       modalSheet.addEventListener("touchend", function (event) { if (event.changedTouches[0] && event.changedTouches[0].clientY - touchStartY > 90) closeModal(); }, { passive:true });
     }
+    if (imagePreview) {
+      imagePreview.addEventListener("touchstart", function (event) { if (event.touches[0]) previewTouchStartY = event.touches[0].clientY; }, { passive:true });
+      imagePreview.addEventListener("touchend", function (event) { if (event.changedTouches[0] && event.changedTouches[0].clientY - previewTouchStartY > 100) closeImagePreview(); }, { passive:true });
+    }
 
     document.querySelectorAll("[data-gallery-index]").forEach(function (img) {
       img.addEventListener("error", function () { imageFallback(img); });
@@ -466,6 +537,13 @@
     });
 
     document.querySelectorAll("[data-switch-language]").forEach(function (link) {
+      if (source !== "direct") {
+        try {
+          var languageUrl = new URL(link.getAttribute("href"), root.location.href);
+          languageUrl.searchParams.set("source", source);
+          link.setAttribute("href", languageUrl.pathname + languageUrl.search);
+        } catch (error) {}
+      }
       link.addEventListener("click", function () { trackEvent("switch_language"); });
     });
     var mapButton = document.getElementById("mapButton");
@@ -475,12 +553,16 @@
     var copyAddressTimer;
     if (copyAddressButton) copyAddressButton.addEventListener("click", function () {
       copyText(copyAddressButton.dataset.address || "").then(function (copied) {
-        if (!copied) return;
+        if (!copied) {
+          showToast(pageLanguage === "en" ? "Copy failed" : "复制失败");
+          return;
+        }
         trackEvent("copy_address");
+        showToast(pageLanguage === "en" ? "Address Copied" : "地址已复制");
         root.clearTimeout(copyAddressTimer);
         copyAddressButton.textContent = copyAddressButton.dataset.successLabel || "✔ 地址已复制";
         copyAddressTimer = root.setTimeout(function () { copyAddressButton.textContent = copyAddressButton.dataset.defaultLabel || "复制门店地址"; }, 2000);
-      }).catch(function () {});
+      }).catch(function () { showToast(pageLanguage === "en" ? "Copy failed" : "复制失败"); });
     });
 
     var rules = document.getElementById("rules");
@@ -506,6 +588,22 @@
       timelineObserver.observe(timeline);
     } else if (timeline) {
       timeline.classList.add("viewed");
+    }
+
+    var finalCta = document.querySelector(".final-cta");
+    var heroSection = document.querySelector(".hero");
+    if (mobileCtaBar && finalCta && heroSection && "IntersectionObserver" in root) {
+      var hiddenCtaTargets = [];
+      var ctaObserver = new root.IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          var index = hiddenCtaTargets.indexOf(entry.target);
+          if (entry.isIntersecting && index === -1) hiddenCtaTargets.push(entry.target);
+          if (!entry.isIntersecting && index !== -1) hiddenCtaTargets.splice(index, 1);
+        });
+        mobileCtaBar.classList.toggle("is-hidden", hiddenCtaTargets.length > 0);
+      }, { threshold:0.08 });
+      ctaObserver.observe(heroSection);
+      ctaObserver.observe(finalCta);
     }
 
     if (expired) {

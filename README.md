@@ -36,7 +36,7 @@ meg-taizhou-h5/
 
 ## 内容和素材配置
 
-当前静态资源版本号为 `20260804-3`。每次发布新版本时，统一更新中英文 `index.html` 中 CSS/JS/图片的 `?v=`、`config.js` 的 `assetVersion`，以及测试页资源版本号。
+当前静态资源版本号为 `20260804-4`。每次发布新版本时，统一更新中英文 `index.html` 中 CSS/JS/图片的 `?v=`、`config.js` 的 `assetVersion`，以及测试页资源版本号。
 
 日常会修改的信息集中在 `config.js`；会员价格、店长名称、微信号和二维码直接写在 `index.html`，确保 JavaScript 未加载时仍可见：
 

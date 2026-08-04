@@ -3,3 +3,9 @@
 
 /index.html
   Cache-Control: no-cache, no-store, must-revalidate
+
+/en/
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/en/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
