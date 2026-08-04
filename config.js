@@ -1,5 +1,5 @@
 window.MEG_CONFIG = {
-  assetVersion: "20260802-2",
+  assetVersion: "20260804-3",
   brandName: "MEG FITNESS",
   storeName: "MEG FITNESS 泰州路店",
   brandProof: "10年专业健身品牌｜第3家门店",
@@ -15,17 +15,21 @@ window.MEG_CONFIG = {
   redemptionDays: 14,
   showRemaining: false,
   accentColor: "#b8ff3d",
-  heroImage: "assets/hero.webp?v=20260802-2",
+  brandLogos: {
+    horizontal: "assets/meg-logo-horizontal.png?v=20260804-3",
+    vertical: "assets/meg-logo-vertical.png?v=20260804-3"
+  },
+  heroImage: "assets/hero.webp?v=20260804-3",
   gallery: [
-    { src: "assets/elevator.webp?v=20260802-2", label: "电梯厅" },
-    { src: "assets/corridor.webp?v=20260802-2", label: "入店走廊" },
-    { src: "assets/gym-1.webp?v=20260802-2", label: "自由训练区" },
-    { src: "assets/gym-2.webp?v=20260802-2", label: "力量器械区" },
-    { src: "assets/gym-3.webp?v=20260802-2", label: "综合训练区" },
-    { src: "assets/pilates-1.webp?v=20260802-2", label: "器械普拉提教室" },
-    { src: "assets/pilates-2.webp?v=20260802-2", label: "普拉提设备" },
-    { src: "assets/changing-room.webp?v=20260802-2", label: "更衣与储物空间" },
-    { src: "assets/shower.webp?v=20260802-2", label: "淋浴空间" }
+    { src: "assets/elevator.webp?v=20260804-3", label: "电梯厅" },
+    { src: "assets/corridor.webp?v=20260804-3", label: "入店走廊" },
+    { src: "assets/gym-1.webp?v=20260804-3", label: "自由训练区" },
+    { src: "assets/gym-2.webp?v=20260804-3", label: "力量器械区" },
+    { src: "assets/gym-3.webp?v=20260804-3", label: "综合训练区" },
+    { src: "assets/pilates-1.webp?v=20260804-3", label: "器械普拉提教室" },
+    { src: "assets/pilates-2.webp?v=20260804-3", label: "普拉提设备" },
+    { src: "assets/changing-room.webp?v=20260804-3", label: "更衣与储物空间" },
+    { src: "assets/shower.webp?v=20260804-3", label: "淋浴空间" }
   ],
   experiences: [
     {
@@ -73,8 +77,8 @@ window.MEG_CONFIG = {
     recovery: "mobility-recovery"
   },
   coachImages: {
-    primary: "assets/coach-xu.webp?v=20260802-2",
-    training: "assets/coach-xu-training.webp?v=20260802-2"
+    primary: "assets/coach-xu.webp?v=20260804-3",
+    training: "assets/coach-xu-training.webp?v=20260804-3"
   },
   showCoachSection: true,
   coaches: [
@@ -84,7 +88,7 @@ window.MEG_CONFIG = {
       name: "许教练",
       englishName: "Coach Xu",
       role: "MEG FITNESS 泰州路店店长",
-      photo: "assets/coach-xu.webp?v=20260802-2",
+      photo: "assets/coach-xu.webp?v=20260804-3",
       specialties: ["功能性训练", "塑形减脂", "举重训练"],
       yearsOfExperience: 10,
       education: "社会体育指导与管理专业",
@@ -97,9 +101,26 @@ window.MEG_CONFIG = {
   showLocationsSection: true,
   showTimeline: true,
   locationImages: {
-    pac: "assets/location-pac.webp?v=20260802-2",
-    wuding: "assets/location-wuding.webp?v=20260802-2",
-    taizhou: "assets/location-taizhou.webp?v=20260802-2"
+    pac: "assets/location-pac.webp?v=20260804-3",
+    pacGallery: [
+      "assets/location-pac-storefront.webp?v=20260804-3",
+      "assets/location-pac-strength.webp?v=20260804-3",
+      "assets/location-pac-rack.webp?v=20260804-3",
+      "assets/location-pac-cardio.webp?v=20260804-3",
+      "assets/location-pac-rower.webp?v=20260804-3",
+      "assets/location-pac-boxing.webp?v=20260804-3",
+      "assets/location-pac-refreshments.webp?v=20260804-3",
+      "assets/location-pac-wash.webp?v=20260804-3"
+    ],
+    wuding: "assets/location-wuding.webp?v=20260804-3",
+    wudingGallery: [
+      "assets/location-wuding-cardio.webp?v=20260804-3",
+      "assets/location-wuding-dumbbells.webp?v=20260804-3",
+      "assets/location-wuding-strength.webp?v=20260804-3",
+      "assets/location-wuding-conditioning.webp?v=20260804-3",
+      "assets/location-wuding-changing.webp?v=20260804-3"
+    ],
+    taizhou: "assets/location-taizhou.webp?v=20260804-3"
   },
   locations: [
     {
@@ -107,7 +128,7 @@ window.MEG_CONFIG = {
       enabled: true,
       name: "MEG FITNESS PAC店",
       englishName: "MEG FITNESS PAC",
-      photo: "assets/location-pac.webp?v=20260802-2",
+      photo: "assets/location-pac.webp?v=20260804-3",
       openingYear: 2016,
       area: "上海市静安区PAC购物中心1号楼",
       positioning: "高端商场私教工作室",
@@ -118,7 +139,7 @@ window.MEG_CONFIG = {
       enabled: true,
       name: "MEG FITNESS 武定路店",
       englishName: "MEG FITNESS Wuding Road",
-      photo: "assets/location-wuding.webp?v=20260802-2",
+      photo: "assets/location-wuding.webp?v=20260804-3",
       openingYear: 2021,
       area: "上海市静安区武定路1102号怡甸公寓一楼",
       positioning: "高端塑形私教工作室",
@@ -129,7 +150,7 @@ window.MEG_CONFIG = {
       enabled: true,
       name: "MEG FITNESS 泰州路店",
       englishName: "MEG FITNESS Taizhou Road",
-      photo: "assets/location-taizhou.webp?v=20260802-2",
+      photo: "assets/location-taizhou.webp?v=20260804-3",
       openingYear: 2026,
       area: "上海市静安区泰州路与余姚路交界",
       positioning: "自由训练、私教与器械普拉提综合训练空间",

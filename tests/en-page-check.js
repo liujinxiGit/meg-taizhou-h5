@@ -29,7 +29,7 @@ const checks = [
   ["Chinese page remains intact", /<html lang="zh-CN">/.test(zh) && zh.includes("开业免费体验") && zh.includes("MEG FITNESS 泰州路店")],
   ["Both pages contain language switches", zh.includes('href="/en/"') && en.includes('href="/"')],
   ["No obvious horizontal overflow rule", /body\{[^}]*overflow-x:hidden/.test(css) && !/width:\s*[1-9][0-9]{3,}px/.test(css)],
-  ["Both pages use root resource paths and version 20260802-2", zh.includes('href="/styles.css?v=20260802-2"') && zh.includes('src="/app.js?v=20260802-2"') && en.includes('href="/styles.css?v=20260802-2"') && en.includes('src="/config.js?v=20260802-2"') && en.includes('src="/app.js?v=20260802-2"') && !en.includes('../app.js') && !en.includes('../config.js') && !en.includes('../styles.css')]
+  ["Both pages use root resource paths and version 20260804-3", zh.includes('href="/styles.css?v=20260804-3"') && zh.includes('src="/app.js?v=20260804-3"') && en.includes('href="/styles.css?v=20260804-3"') && en.includes('src="/config.js?v=20260804-3"') && en.includes('src="/app.js?v=20260804-3"') && !en.includes('../app.js') && !en.includes('../config.js') && !en.includes('../styles.css')]
 ];
 
 checks.forEach(([name, passed]) => console.log(`${passed ? "PASS" : "FAIL"}: ${name}`));

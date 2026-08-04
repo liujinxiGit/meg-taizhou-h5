@@ -36,7 +36,7 @@ meg-taizhou-h5/
 
 ## 内容和素材配置
 
-当前静态资源版本号为 `20260802-2`。每次发布新版本时，统一更新中英文 `index.html` 中 CSS/JS/图片的 `?v=`、`config.js` 的 `assetVersion`，以及测试页资源版本号。
+当前静态资源版本号为 `20260804-3`。每次发布新版本时，统一更新中英文 `index.html` 中 CSS/JS/图片的 `?v=`、`config.js` 的 `assetVersion`，以及测试页资源版本号。
 
 日常会修改的信息集中在 `config.js`；会员价格、店长名称、微信号和二维码直接写在 `index.html`，确保 JavaScript 未加载时仍可见：
 
@@ -52,16 +52,25 @@ meg-taizhou-h5/
 
 ### 教练与三店图片
 
+正式品牌 Logo 已由用户提供的 Illustrator 文件导出为透明 PNG：
+
+- `assets/meg-logo-horizontal.png`：用于中英文首屏顶部。
+- `assets/meg-logo-vertical.png`：用于 favicon 和页面底部品牌区。
+
+更新 Logo 时建议从原始 AI 文件重新导出透明背景 PNG，不要直接截屏；覆盖同名文件后同步升级资源版本号。
+
 教练照片已经按页面比例处理为 WebP，可直接替换同名文件：
 
 - `assets/coach-xu.webp`：教练主照片，4:5 竖图，推荐 1000 × 1250 px。
 - `assets/coach-xu-training.webp`：训练教学照片，3:2 横图，推荐 1200 × 800 px；4:3 横图也可使用。
 
-三家门店照片预留以下路径，建议统一使用 4:3 横图、1200 × 900 px：
+门店照片建议统一使用 4:3 横图、1200 × 900 px：
 
-- `assets/location-pac.webp`
-- `assets/location-wuding.webp`
+- `assets/location-pac.webp`：已使用PAC店商场门面实拍。
+- `assets/location-wuding.webp`：已使用武定路店门头实拍。
 - `assets/location-taizhou.webp`
+
+PAC店另外八张实拍已经放入详情相册，包含商场门面、力量器械、综合训练架、有氧设备、划船机、拳击装备、补给区和洗手区。武定路店另外五张实拍也已放入详情相册。
 
 替换时覆盖对应同名文件即可。WebP 推荐质量 75—85，并尽量将单张文件控制在 200 KB 内。若照片路径不存在，页面会显示带门店名称的品牌风格占位卡，不会显示破图；上线新照片后仍应升级全站 `?v=` 版本号，避免微信继续读取旧缓存。
 

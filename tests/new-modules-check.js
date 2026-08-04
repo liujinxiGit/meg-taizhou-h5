@@ -13,6 +13,11 @@ const goalIds = ["independent", "body-shaping", "posture", "discomfort", "streng
 const count = (html, pattern) => (html.match(pattern) || []).length;
 const block = (html, selector, id) => (html.match(new RegExp(`<article class="${selector}"[^>]*data-[^=]+="${id}"[\\s\\S]*?</article>`)) || [""])[0];
 const ordered = (html, values) => values.every((value, index) => index === 0 || html.indexOf(value) > html.indexOf(values[index - 1]));
+const assetExists = filename => fs.existsSync(path.join(root, "assets", filename));
+const isTransparentPng = filename => {
+  const png = fs.readFileSync(path.join(root, "assets", filename));
+  return png.subarray(1, 4).toString() === "PNG" && [4, 6].includes(png[25]);
+};
 
 const checks = [
   ["1. Nine specialist programs exist on both pages", [zh, en].every(html => count(html, /class="program-tab js-program-toggle"/g) === 9 && programIds.every(id => html.includes(`data-program="${id}"`) && html.includes(`data-program-detail="${id}"`)))],
@@ -40,7 +45,10 @@ const checks = [
   ["23. Mobile page overflow is guarded", /body\{[^}]*overflow-x:hidden/.test(css) && css.includes("min-width:0") && css.includes("overflow-wrap:anywhere") && css.includes(".brand-location-list{display:flex") && css.includes("overflow-x:auto")],
   ["24. New analytics events and metadata exist", ["training_program_selected", "goal_selected", "goal_recommendation_cta", "coach_profile_expanded", "location_card_expanded", "location_map_clicked", "timeline_viewed", "recommended_service", "timestamp"].every(value => app.includes(value))],
   ["Twelve bilingual goals and result cards exist", [zh, en].every(html => count(html, /class="goal-button js-goal-button"/g) === 12 && count(html, /data-goal-result=/g) === 12 && goalIds.every(id => html.includes(`data-goal="${id}"`) && html.includes(`data-goal-result="${id}"`)))],
-  ["Program, coach and location data are direct HTML", config.includes("showCoachSection: true") && !/data-config-section="coach" hidden/.test(zh + en) && [zh, en].every(html => count(html, /data-location-id="(?:pac|wuding|taizhou)"/g) >= 3)]
+  ["Program, coach and location data are direct HTML", config.includes("showCoachSection: true") && !/data-config-section="coach" hidden/.test(zh + en) && [zh, en].every(html => count(html, /data-location-id="(?:pac|wuding|taizhou)"/g) >= 3)],
+  ["Official logos are transparent and have no white CSS card", ["meg-logo-horizontal.png", "meg-logo-vertical.png"].every(isTransparentPng) && [zh, en].every(html => html.includes("meg-logo-horizontal.png") && html.includes("meg-logo-vertical.png")) && !/\.brand-logo-horizontal\{[^}]*background:/.test(css) && !/\.footer-brand-logo\{[^}]*background:/.test(css)],
+  ["All supplied Wuding Road photos are included", ["location-wuding.webp", "location-wuding-cardio.webp", "location-wuding-dumbbells.webp", "location-wuding-strength.webp", "location-wuding-conditioning.webp", "location-wuding-changing.webp"].every(assetExists) && [zh, en].every(html => html.includes("location-wuding.webp") && html.includes("location-wuding-changing.webp"))],
+  ["All supplied PAC photos are included", ["location-pac.webp", "location-pac-storefront.webp", "location-pac-strength.webp", "location-pac-rack.webp", "location-pac-cardio.webp", "location-pac-rower.webp", "location-pac-boxing.webp", "location-pac-refreshments.webp", "location-pac-wash.webp"].every(assetExists) && [zh, en].every(html => count(html, /class="location-photo-item js-image-preview"/g) === 13 && html.includes("location-pac.webp") && html.includes("location-pac-wash.webp"))]
 ];
 
 checks.forEach(([name, passed]) => console.log(`${passed ? "PASS" : "FAIL"}: ${name}`));
