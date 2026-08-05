@@ -29,9 +29,21 @@
   function formatTime(value) { if (!value) return "—"; try { return new Intl.DateTimeFormat("zh-CN", { dateStyle:"short", timeStyle:"short", timeZone:"Asia/Shanghai" }).format(new Date(value)); } catch (error) { return value; } }
   function showToast(message) { var toast = document.getElementById("opsToast"); if (!toast) return; root.clearTimeout(toastTimer); toast.textContent = message; toast.classList.add("show"); toastTimer = root.setTimeout(function () { toast.classList.remove("show"); }, 2200); }
   function setAuth(ok, text) { var element = document.getElementById("authState"); if (!element) return; element.classList.toggle("ok", ok); element.classList.toggle("error", !ok); element.querySelector("span").textContent = text; }
-  function fetchJson(url, options) { return root.fetch(url, options).then(function (response) { if (response.status === 401) throw new Error("unauthorized"); if (!response.ok) throw new Error("request_failed"); return response.json(); }); }
+  function fetchJson(url, options) {
+    return root.fetch(url, Object.assign({ credentials:"same-origin", headers:{ "Accept":"application/json" } }, options || {}, {
+      headers:Object.assign({ "Accept":"application/json" }, (options && options.headers) || {})
+    })).then(function (response) {
+      return response.json().catch(function () { return {}; }).then(function (payload) {
+        if (response.status === 401) throw new Error("unauthorized");
+        if (!response.ok) throw new Error(payload.error || "request_failed");
+        return payload;
+      });
+    });
+  }
 
   function renderSummary(data) {
+    var bookingTotals = { today_bookings:Number(data.bookings && data.bookings.today || 0), week_bookings:Number(data.bookings && data.bookings.week || 0) };
+    Object.keys(bookingTotals).forEach(function (key) { var target = document.querySelector('[data-summary="' + key + '"]'); if (target) target.textContent = bookingTotals[key]; });
     Object.keys(data.today || {}).forEach(function (key) { var target = document.querySelector('[data-summary="' + key + '"]'); if (target) target.textContent = data.today[key]; });
     var trend = data.trend7d || [], maximum = Math.max.apply(Math, trend.map(function (item) { return Number(item.count); }).concat([1]));
     document.getElementById("trendChart").innerHTML = trend.length ? trend.map(function (item) { return '<div class="bar-item"><b>' + Number(item.count) + '</b><i style="height:' + Math.max(3, Math.round(Number(item.count) / maximum * 72)) + 'px"></i><span>' + escapeHtml(item.date.slice(5)) + '</span></div>'; }).join("") : '<p class="empty">近 7 天暂无新增</p>';

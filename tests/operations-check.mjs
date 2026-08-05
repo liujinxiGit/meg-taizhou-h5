@@ -46,6 +46,7 @@ check("17. Ops mobile card and Bottom Sheet layouts exist", opsCss.includes(".le
 check("18. Existing H5 modal and long-press QR structure remain", [zh, en].every((html) => html.includes('id="claimModal"') && /<img[^>]+id="modalQr"[^>]+manager-wechat\.png/.test(html)) && !/contextmenu|touchstart[^\n]+preventDefault/.test(app));
 check("19. Ops filters, status controls, notes and export exist", ["dateFrom","dateTo","service","source","status","language","exportButton","leadNote","data-status"].every((value) => (opsHtml + opsJs).includes(value)) && opsJs.includes("if (currentIndex < 0) return true"));
 check("20. Migration contains required indexes and no personal fields", ["idx_leads_claim_code","idx_leads_created_at","idx_leads_status","idx_leads_service","idx_leads_source","idx_leads_store"].every((value) => migration.includes(value)) && !/phone|mobile|wechat|ip_address|gender|health/i.test(migration));
+check("21. Dashboard and summary API expose today and current-week booking totals", opsHtml.includes('data-summary="today_bookings"') && opsHtml.includes('data-summary="week_bookings"') && summaryApi.includes("bookings:{ today:todayBookings") && summaryApi.includes("weekStart"));
 
 checks.forEach(([name, passed]) => console.log(`${passed ? "PASS" : "FAIL"}: ${name}`));
 if (checks.some(([, passed]) => !passed)) process.exit(1);

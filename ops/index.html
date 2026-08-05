@@ -6,7 +6,7 @@
   <meta name="robots" content="noindex,nofollow,noarchive">
   <meta name="theme-color" content="#111312">
   <title>MEG Operations | 门店线索与预约工作台</title>
-  <link rel="stylesheet" href="ops.css?v=20260804-7">
+  <link rel="stylesheet" href="ops.css?v=20260806-1">
 </head>
 <body>
   <header class="ops-header">
@@ -18,7 +18,8 @@
     <section aria-labelledby="dashboardTitle">
       <div class="section-heading"><div><p class="eyebrow">TODAY</p><h2 id="dashboardTitle">今日概览</h2></div><button class="button secondary" id="refreshButton" type="button">刷新数据</button></div>
       <div class="summary-grid" id="summaryGrid" aria-live="polite">
-        <article><span>今日新增</span><strong data-summary="new">—</strong></article>
+        <article><span>今日预约</span><strong data-summary="today_bookings">—</strong></article>
+        <article><span>本周预约</span><strong data-summary="week_bookings">—</strong></article>
         <article><span>已加微信</span><strong data-summary="wechat_added">—</strong></article>
         <article><span>已预约</span><strong data-summary="booked">—</strong></article>
         <article><span>已到店</span><strong data-summary="visited">—</strong></article>
@@ -58,6 +59,6 @@
     <aside class="detail-sheet"><div class="drag-handle"></div><button class="close-button" type="button" data-close-detail aria-label="关闭">×</button><p class="eyebrow">LEAD DETAIL</p><h2 id="detailTitle">线索详情</h2><div id="detailContent"></div></aside>
   </div>
   <div class="toast" id="opsToast" role="status" aria-live="polite"></div>
-  <script defer src="ops.js?v=20260804-7"></script>
+  <script defer src="ops.js?v=20260806-1"></script>
 </body>
 </html>
