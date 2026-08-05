@@ -5,29 +5,37 @@
     "zh-CN": {
       "open-gym": {
         title: "自由训练体验周卡",
-        message: "你好，我从MEG FITNESS泰州路店开业宣传单扫码进入，想领取自由训练体验周卡。"
+        message: "你好，我从 MEG FITNESS 泰州路店开业活动页面进入，想预约【自由训练体验周卡】。"
       },
       "personal-training": {
         title: "塑形私教体验课",
-        message: "你好，我从MEG FITNESS泰州路店开业宣传单扫码进入，想预约塑形私教体验。"
+        message: "你好，我从 MEG FITNESS 泰州路店开业活动页面进入，想预约【塑形私教体验课】。"
       },
       pilates: {
         title: "器械普拉提体验课",
-        message: "你好，我从MEG FITNESS泰州路店开业宣传单扫码进入，想预约器械普拉提体验。"
+        message: "你好，我从 MEG FITNESS 泰州路店开业活动页面进入，想预约【器械普拉提体验课】。"
+      },
+      boxing: {
+        title: "拳击体验课",
+        message: "你好，我从 MEG FITNESS 泰州路店开业活动页面进入，想预约【拳击体验课】。"
       }
     },
     en: {
       "open-gym": {
         title: "7-Day Open Gym Trial",
-        message: "Hi, I found MEG FITNESS Taizhou Road through the opening promotion. I would like to claim the 7-day Open Gym trial."
+        message: "Hi, I found MEG FITNESS Taizhou Road through the opening promotion and would like to book the 7-day Open Gym trial."
       },
       "personal-training": {
         title: "Personal Training Trial",
-        message: "Hi, I found MEG FITNESS Taizhou Road through the opening promotion. I would like to book the Personal Training trial."
+        message: "Hi, I found MEG FITNESS Taizhou Road through the opening promotion and would like to book the Personal Training trial."
       },
       pilates: {
         title: "Reformer Pilates Trial",
-        message: "Hi, I found MEG FITNESS Taizhou Road through the opening promotion. I would like to book the Reformer Pilates trial."
+        message: "Hi, I found MEG FITNESS Taizhou Road through the opening promotion and would like to book the Reformer Pilates trial."
+      },
+      boxing: {
+        title: "Boxing Training Trial",
+        message: "Hi, I found MEG FITNESS Taizhou Road through the opening promotion and would like to book the Boxing Training trial."
       }
     }
   };
@@ -77,6 +85,22 @@
   function rulesExpanded(current) { return !Boolean(current); }
   function imageFallback(img) { if (img && img.parentElement) img.parentElement.classList.add("is-fallback"); return true; }
   function normalizeLanguage(language) { return String(language || "").toLowerCase().indexOf("en") === 0 ? "en" : "zh-CN"; }
+  function mapLeadService(value) {
+    var services = {
+      "open-gym":"open_gym", "open-gym-membership":"open_gym", "personal-training":"personal_training",
+      pilates:"reformer_pilates", posture:"posture_training", "physical-reconditioning":"physical_reconditioning",
+      weightlifting:"weightlifting", functional:"functional_training", "mobility-recovery":"mobility_recovery",
+      recovery:"mobility_recovery", "sports-performance":"sports_performance", boxing:"boxing",
+      "youth-fitness":"youth_fitness", "group-classes":"group_classes"
+    };
+    return services[value] || "other";
+  }
+  function buildBookingMessage(baseMessage, claimCode, language) {
+    var normalizedLanguage = normalizeLanguage(language);
+    var closing = normalizedLanguage === "en" ? "Could you let me know the available times?" : "请问最近可以预约什么时间？";
+    var reference = claimCode ? (normalizedLanguage === "en" ? "Booking reference: " : "预约编号：") + claimCode : "";
+    return [String(baseMessage || "").trim(), reference, closing].filter(Boolean).join("\n\n");
+  }
 
   root.MEG_EXPERIENCE_CONTENT = EXPERIENCE_CONTENT;
   root.MEG_UTILS = {
@@ -88,7 +112,9 @@
     serializeStorage:serializeStorage,
     rulesExpanded:rulesExpanded,
     imageFallback:imageFallback,
-    normalizeLanguage:normalizeLanguage
+    normalizeLanguage:normalizeLanguage,
+    mapLeadService:mapLeadService,
+    buildBookingMessage:buildBookingMessage
   };
 
   if (!root.document) return;
@@ -104,9 +130,15 @@
     var deadline = config.deadline || "2026-09-30T23:00:00+08:00";
     var source = parseSource(root.location && root.location.search);
     var currentClaimMessage = "";
+    var currentClaimCode = "";
     var currentExperience = "";
+    var currentLeadService = "";
+    var leadRequestToken = 0;
+    var leadPromises = {};
     var storage = null;
+    var session = null;
     try { storage = root.localStorage; } catch (error) { storage = null; }
+    try { session = root.sessionStorage; } catch (error) { session = null; }
 
     if (config.accentColor) document.documentElement.style.setProperty("--accent", config.accentColor);
 
@@ -121,6 +153,27 @@
     function hasStoredValue(key) {
       if (!storage) return false;
       try { return Boolean(storage.getItem(key)); } catch (error) { return false; }
+    }
+    function sessionGet(key) {
+      if (!session) return "";
+      try { return session.getItem(key) || ""; } catch (error) { return ""; }
+    }
+    function sessionSet(key, value) {
+      if (!session) return;
+      try { session.setItem(key, String(value)); } catch (error) {}
+    }
+    function createRequestId(service) {
+      var existing = sessionGet("megLeadRequest:" + service);
+      if (existing) return existing;
+      var random = "";
+      try {
+        var bytes = new Uint8Array(12);
+        root.crypto.getRandomValues(bytes);
+        random = Array.prototype.map.call(bytes, function (byte) { return byte.toString(16).padStart(2, "0"); }).join("");
+      } catch (error) { random = String(Date.now()) + String(Math.random()).slice(2); }
+      var requestId = "meg_" + service + "_" + random;
+      sessionSet("megLeadRequest:" + service, requestId);
+      return requestId;
     }
     function trackEvent(name, details) {
       var logs = safeGet("eventLogs", []);
@@ -191,7 +244,91 @@
     function experienceEvent(experience) {
       if (experience === "open-gym") return pageLanguage === "en" ? "select_open_gym" : "select_free_training";
       if (experience === "personal-training") return "select_personal_training";
+      if (experience === "boxing") return "select_boxing";
       return "select_pilates";
+    }
+
+    function setClaimLoading(loading, message) {
+      var copyButton = document.getElementById("copyButton");
+      var claimCodeElement = document.getElementById("claimCode");
+      var claimCodeStatus = document.getElementById("claimCodeStatus");
+      if (copyButton) copyButton.disabled = Boolean(loading);
+      if (claimCodeElement) claimCodeElement.textContent = loading ? (pageLanguage === "en" ? "Generating…" : "正在生成…") : (currentClaimCode || (pageLanguage === "en" ? "Not available" : "暂未生成"));
+      if (claimCodeStatus) {
+        claimCodeStatus.textContent = message || "";
+        claimCodeStatus.classList.toggle("is-error", !loading && !currentClaimCode && Boolean(message));
+      }
+    }
+
+    function requestLead(service, language) {
+      var cachedCode = sessionGet("megClaimCode:" + service);
+      if (cachedCode) return Promise.resolve({ claimCode:cachedCode, reused:true });
+      if (leadPromises[service]) return leadPromises[service];
+      if (!root.fetch) return Promise.reject(new Error("fetch_unavailable"));
+      var requestId = createRequestId(service);
+      var payload = {
+        service:service,
+        language:normalizeLanguage(language),
+        source:source,
+        store:"taizhou",
+        campaign:"taizhou-opening-2026",
+        pagePath:(root.location && root.location.pathname) || "/",
+        requestId:requestId
+      };
+      var timeoutPromise = new Promise(function (_, reject) {
+        root.setTimeout(function () { reject(new Error("request_timeout")); }, 5500);
+      });
+      var leadPromise = Promise.race([
+        root.fetch("/api/leads", {
+          method:"POST",
+          headers:{ "Content-Type":"application/json" },
+          credentials:"same-origin",
+          body:JSON.stringify(payload)
+        }).then(function (response) {
+          if (!response.ok) throw new Error("lead_create_failed");
+          return response.json();
+        }).then(function (data) {
+          if (!data || !data.ok || !data.claimCode) throw new Error("invalid_lead_response");
+          sessionSet("megClaimCode:" + service, data.claimCode);
+          return data;
+        }),
+        timeoutPromise
+      ]);
+      leadPromises[service] = leadPromise.then(function (value) {
+        delete leadPromises[service];
+        return value;
+      }, function (error) {
+        delete leadPromises[service];
+        throw error;
+      });
+      return leadPromises[service];
+    }
+
+    function prepareLead(experience, language, baseMessage) {
+      var normalizedLanguage = normalizeLanguage(language);
+      var service = mapLeadService(experience);
+      var requestToken = ++leadRequestToken;
+      currentLeadService = service;
+      currentClaimCode = "";
+      currentClaimMessage = buildBookingMessage(baseMessage, "", normalizedLanguage);
+      setText("messageText", currentClaimMessage);
+      setText("copyStatus", "");
+      setClaimLoading(true, normalizedLanguage === "en" ? "Generating your anonymous booking reference…" : "正在生成匿名预约编号…");
+      requestLead(service, normalizedLanguage).then(function (data) {
+        if (requestToken !== leadRequestToken || currentLeadService !== service) return;
+        currentClaimCode = data.claimCode;
+        currentClaimMessage = buildBookingMessage(baseMessage, currentClaimCode, normalizedLanguage);
+        setText("messageText", currentClaimMessage);
+        setClaimLoading(false, normalizedLanguage === "en" ? "Reference ready" : "预约编号已生成");
+      }).catch(function () {
+        if (requestToken !== leadRequestToken || currentLeadService !== service) return;
+        currentClaimCode = "";
+        currentClaimMessage = buildBookingMessage(baseMessage, "", normalizedLanguage);
+        setText("messageText", currentClaimMessage);
+        setClaimLoading(false, normalizedLanguage === "en"
+          ? "The reference could not be generated. You can still add the gym manager on WeChat and book directly."
+          : "预约编号暂时生成失败，你仍可直接添加微信预约。");
+      });
     }
 
     function openClaimModal(experience, language) {
@@ -203,16 +340,14 @@
         return;
       }
       currentExperience = experience;
-      currentClaimMessage = content.message;
       setText("selectedName", content.title);
-      setText("messageText", content.message);
-      setText("copyStatus", "");
       modal.hidden = false;
       modal.classList.add("open");
       modal.setAttribute("aria-hidden", "false");
       lockPage();
       trackEvent(experienceEvent(experience));
       trackEvent("view_wechat_qr");
+      prepareLead(experience, normalizedLanguage, content.message);
       root.setTimeout(function () {
         var copyButton = document.getElementById("copyButton");
         if (copyButton) copyButton.focus();
@@ -226,16 +361,14 @@
         return;
       }
       currentExperience = "open-gym-membership";
-      currentClaimMessage = content.message;
       setText("selectedName", content.title);
-      setText("messageText", content.message);
-      setText("copyStatus", "");
       modal.hidden = false;
       modal.classList.add("open");
       modal.setAttribute("aria-hidden", "false");
       lockPage();
       trackEvent("click_open_gym_membership");
       trackEvent("view_wechat_qr");
+      prepareLead("open-gym-membership", pageLanguage, content.message);
     }
 
     function openConsultationModal(topic, language) {
@@ -246,19 +379,18 @@
         return;
       }
       currentExperience = topic;
-      currentClaimMessage = content.message;
       setText("selectedName", content.title);
-      setText("messageText", content.message);
-      setText("copyStatus", "");
       modal.hidden = false;
       modal.classList.add("open");
       modal.setAttribute("aria-hidden", "false");
       lockPage();
       trackEvent("view_wechat_qr");
+      prepareLead(topic, normalizedLanguage, content.message);
     }
 
     function closeModal() {
       if (!modal) return;
+      leadRequestToken += 1;
       modal.classList.remove("open");
       modal.setAttribute("aria-hidden", "true");
       modal.hidden = true;
@@ -310,12 +442,22 @@
       if (!currentClaimMessage) return;
       copyText(currentClaimMessage).then(function (copied) {
         var success = pageLanguage === "en"
-          ? "Message copied. Please add the gym manager on WeChat and send it."
-          : "话术已复制，请添加店长微信并发送";
+          ? "Copied. Add the gym manager on WeChat and send the message."
+          : "已复制，添加店长微信后直接粘贴发送即可";
         var failure = body.dataset.copyFailure || (pageLanguage === "en" ? "Copy failed. Please copy the message manually." : "复制失败，请长按上方话术手动复制。");
         setText("copyStatus", copied ? success : failure);
-        showToast(copied ? (pageLanguage === "en" ? "Message Copied" : "话术已复制") : failure);
-        if (copied) trackEvent("copy_message");
+        showToast(copied ? success : failure);
+        if (copied) {
+          trackEvent("copy_message");
+          if (currentClaimCode && root.fetch) {
+            root.fetch("/api/leads/" + encodeURIComponent(currentClaimCode) + "/event", {
+              method:"PATCH",
+              headers:{ "Content-Type":"application/json" },
+              credentials:"same-origin",
+              body:JSON.stringify({ eventStage:"message_copied" })
+            }).catch(function () {});
+          }
+        }
       }).catch(function () {
         var failure = pageLanguage === "en" ? "Copy failed. Please copy the message manually." : "复制失败，请长按上方话术手动复制。";
         setText("copyStatus", failure);

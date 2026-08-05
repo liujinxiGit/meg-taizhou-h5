@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="theme-color" content="#111312">
+  <title>MEG Operations | 门店线索与预约工作台</title>
+  <link rel="stylesheet" href="ops.css?v=20260804-7">
+</head>
+<body>
+  <header class="ops-header">
+    <div><p class="brand-mark">MEG FITNESS</p><h1>MEG Operations</h1><p>门店线索与预约工作台 <span>· Lead &amp; Booking Operations</span></p></div>
+    <div class="auth-state" id="authState" role="status"><i></i><span>正在验证 Cloudflare Access 登录状态…</span></div>
+  </header>
+
+  <main>
+    <section aria-labelledby="dashboardTitle">
+      <div class="section-heading"><div><p class="eyebrow">TODAY</p><h2 id="dashboardTitle">今日概览</h2></div><button class="button secondary" id="refreshButton" type="button">刷新数据</button></div>
+      <div class="summary-grid" id="summaryGrid" aria-live="polite">
+        <article><span>今日新增</span><strong data-summary="new">—</strong></article>
+        <article><span>已加微信</span><strong data-summary="wechat_added">—</strong></article>
+        <article><span>已预约</span><strong data-summary="booked">—</strong></article>
+        <article><span>已到店</span><strong data-summary="visited">—</strong></article>
+        <article><span>已成交</span><strong data-summary="converted">—</strong></article>
+      </div>
+      <div class="insight-grid">
+        <article><h3>近 7 天新增趋势</h3><div class="bar-list" id="trendChart"><p class="empty">等待数据</p></div></article>
+        <article><h3>项目 / 来源 / 语言</h3><div class="breakdown" id="breakdown"><p class="empty">等待数据</p></div></article>
+      </div>
+    </section>
+
+    <section aria-labelledby="leadListTitle">
+      <div class="section-heading"><div><p class="eyebrow">LEADS</p><h2 id="leadListTitle">预约线索</h2></div><button class="button secondary" id="exportButton" type="button">导出 CSV</button></div>
+      <form class="filters" id="filterForm">
+        <label class="search-field"><span>搜索预约编号或备注</span><input id="searchInput" name="search" type="search" autocomplete="off" placeholder="例如 TZ-260804-A7K3"></label>
+        <label><span>开始日期</span><input name="dateFrom" type="date"></label>
+        <label><span>结束日期</span><input name="dateTo" type="date"></label>
+        <label><span>门店</span><select name="store"><option value="">全部门店</option><option value="taizhou">泰州路店</option></select></label>
+        <label><span>项目</span><select name="service"><option value="">全部项目</option><option value="open_gym">自由训练</option><option value="personal_training">塑形私教</option><option value="reformer_pilates">器械普拉提</option><option value="posture_training">体态纠正</option><option value="physical_reconditioning">物理重建</option><option value="weightlifting">举重训练</option><option value="functional_training">功能性训练</option><option value="mobility_recovery">拉伸恢复</option><option value="sports_performance">运动表现</option><option value="boxing">拳击训练</option><option value="youth_fitness">青少儿体适能</option><option value="group_classes">团体课程</option><option value="other">其他</option></select></label>
+        <label><span>来源</span><input name="source" type="text" maxlength="64" placeholder="例如 flyer"></label>
+        <label><span>状态</span><select name="status"><option value="">全部状态</option><option value="new">新线索</option><option value="wechat_added">已加微信</option><option value="booked">已预约</option><option value="visited">已到店</option><option value="converted">已成交</option><option value="invalid">无效</option><option value="closed">已关闭</option></select></label>
+        <label><span>语言</span><select name="language"><option value="">全部语言</option><option value="zh-CN">中文</option><option value="en">English</option></select></label>
+        <div class="filter-actions"><button class="button primary" type="submit">应用筛选</button><button class="button ghost" id="resetButton" type="button">清空</button></div>
+      </form>
+
+      <div class="lead-shell" aria-live="polite">
+        <div class="table-wrap"><table><thead><tr><th>预约编号</th><th>创建时间</th><th>项目</th><th>来源</th><th>语言</th><th>门店</th><th>阶段</th><th>状态</th><th>备注摘要</th></tr></thead><tbody id="leadTableBody"></tbody></table></div>
+        <div class="lead-cards" id="leadCards"></div>
+        <p class="empty" id="leadEmpty" hidden>没有符合条件的线索。</p>
+        <div class="pagination"><button class="button ghost" id="prevPage" type="button">上一页</button><span id="pageInfo">第 1 页</span><button class="button ghost" id="nextPage" type="button">下一页</button></div>
+      </div>
+    </section>
+  </main>
+
+  <div class="detail-panel" id="detailPanel" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+    <button class="detail-backdrop" type="button" data-close-detail aria-label="关闭详情"></button>
+    <aside class="detail-sheet"><div class="drag-handle"></div><button class="close-button" type="button" data-close-detail aria-label="关闭">×</button><p class="eyebrow">LEAD DETAIL</p><h2 id="detailTitle">线索详情</h2><div id="detailContent"></div></aside>
+  </div>
+  <div class="toast" id="opsToast" role="status" aria-live="polite"></div>
+  <script defer src="ops.js?v=20260804-7"></script>
+</body>
+</html>
