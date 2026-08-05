@@ -5,7 +5,7 @@ pages_build_output_dir = "."
 [[d1_databases]]
 binding = "DB"
 database_name = "meg-operations"
-database_id = "REPLACE_WITH_D1_DATABASE_ID"
+database_id = "13bad6c0-ee9f-41bb-9b22-c488ce34ccc1"
 migrations_dir = "migrations"
 
 [vars]
@@ -14,3 +14,4 @@ OPS_ORIGINS = "https://megops.jinxiliu.com"
 CF_ACCESS_TEAM_DOMAIN = "REPLACE_WITH_ACCESS_TEAM_NAME"
 CF_ACCESS_AUD = "REPLACE_WITH_ACCESS_APPLICATION_AUD"
 LOCAL_DEV = "false"
+
