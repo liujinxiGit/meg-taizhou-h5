@@ -128,7 +128,7 @@ npx wrangler d1 migrations apply meg-operations --remote
 node scripts/generate-ops-secrets.mjs
 ```
 
-脚本会隐藏交互式密码输入，并只在终端输出 `OPS_PASSWORD_HASH`、`OPS_PASSWORD_HASH_FINGERPRINT` 和 `OPS_SESSION_SECRET`，不会写入任何文件。指纹是完整密码 Hash 字符串的 SHA-256 前 12 位十六进制，只用于与安全诊断返回值比对。非交互环境可通过临时的 `OPS_PASSWORD` 环境变量传入待哈希密码；不要使用会进入 shell history 的明文命令行参数。密码至少 12 个字符。
+脚本会隐藏交互式密码输入，并只在终端输出 `OPS_PASSWORD_HASH` 和 `OPS_SESSION_SECRET`，不会写入任何文件。非交互环境可通过临时的 `OPS_PASSWORD` 环境变量传入待哈希密码；不要使用会进入 shell history 的明文命令行参数。密码至少 12 个字符。
 
 密码哈希格式为：
 
@@ -137,8 +137,6 @@ pbkdf2_sha256$100000$saltBase64$hashBase64
 ```
 
 它使用 PBKDF2-HMAC-SHA-256、至少 16 字节随机 salt 和 32 字节输出。`OPS_SESSION_SECRET` 是 32 字节随机值的 base64url 编码。不要把脚本输出粘贴到 `wrangler.toml`、源码、README 或 Git 追踪文件。
-
-登录故障排查期间，登录 API 的失败响应会直接包含 `passwordHashFingerprint`、`stage`、`passwordHashRead` 和 `sessionSecretRead`。指纹是密码 Hash 的 12 位 SHA-256 前缀；响应不会返回 Secret、哈希、salt 或密码内容。若同时设置 `OPS_AUTH_DEBUG=true`，仅在 Web Crypto 抛出异常时额外返回截断至 160 字符的 `cryptoErrorName`、`cryptoErrorMessage` 和 `cryptoErrorStage`，不返回堆栈或加密输入。加密运算异常返回 HTTP `503` 与 `auth_configuration_error`，不会记为密码错误。`password_mismatch` 表示 PBKDF2 已成功执行但输入密码与 Hash 不对应；`session_signing_failed` 表示密码已通过、问题发生在 Session Secret 或签名阶段。排查完成后应恢复为不返回这些诊断字段。
 
 生产兼容运行时检查使用真实 Wrangler Pages/workerd 启动完整登录 Function：
 

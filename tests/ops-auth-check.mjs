@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { createHash, pbkdf2Sync, randomBytes, webcrypto } from "node:crypto";
+import { pbkdf2Sync, randomBytes, webcrypto } from "node:crypto";
 import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { onRequestPost as login } from "../functions/api/ops/auth/login.js";
@@ -7,9 +7,8 @@ import { onRequestGet as session } from "../functions/api/ops/auth/session.js";
 import { onRequestPost as logout } from "../functions/api/ops/auth/logout.js";
 import { onRequestGet as summary } from "../functions/api/ops/summary.js";
 import {
-  OPS_SESSION_MAX_AGE, createSessionToken, getLoginFailureCount, inspectOpsAuthEnvironment,
-  parsePasswordHash, passwordHashFingerprint, verifyPassword, verifyPasswordWithDiagnostics,
-  verifySessionToken
+  OPS_SESSION_MAX_AGE, createSessionToken, getLoginFailureCount, parsePasswordHash,
+  verifyPassword, verifySessionToken
 } from "../functions/_shared/ops-auth.mjs";
 
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -51,37 +50,21 @@ assert.equal(parsedPasswordHash.iterations, 100000);
 assert.equal(parsePasswordHash(`pbkdf2_sha256$100000$not-standard-base64$also-invalid`), null);
 assert.equal(await verifyPassword(password, passwordHash), true);
 assert.equal(await verifyPassword(`${password}-wrong`, passwordHash), false);
-const expectedFingerprint = createHash("sha256").update(passwordHash, "utf8").digest("hex").slice(0, 12);
-assert.equal(await passwordHashFingerprint(passwordHash), expectedFingerprint);
-assert.equal(await passwordHashFingerprint(passwordHash), await passwordHashFingerprint(passwordHash));
-assert.notEqual(await passwordHashFingerprint(passwordHash), await passwordHashFingerprint(`${passwordHash}different`));
-assert.deepEqual(inspectOpsAuthEnvironment(env), {
-  passwordHashRead:true,
-  passwordHashFormatValid:true,
-  sessionSecretRead:true,
-  sessionSecretFormatValid:true
-});
-assert.equal((await verifyPasswordWithDiagnostics(`${password}-wrong`, passwordHash)).stage, "password_mismatch");
 
-const debugPassword = `${password}-diagnostic-wrong`;
-const debugResponse = await login({
-  request:request("/api/ops/auth/login", { ip:"192.0.2.80", userAgent:"DebugTest/1", method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ password:debugPassword }) }),
+const wrongPassword = `${password}-wrong-response`;
+const wrongPasswordResponse = await login({
+  request:request("/api/ops/auth/login", { ip:"192.0.2.80", userAgent:"WrongPasswordTest/1", method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ password:wrongPassword }) }),
   env
 });
-assert.equal(debugResponse.status, 401);
-const debugBodyText = await debugResponse.text();
-const debugBody = JSON.parse(debugBodyText);
-assert.deepEqual(debugBody, {
-  ok:false,
-  error:"invalid_credentials",
-  passwordHashRead:true,
-  sessionSecretRead:true,
-  passwordHashFingerprint:expectedFingerprint,
-  stage:"password_mismatch"
+assert.equal(wrongPasswordResponse.status, 401);
+assert.deepEqual(await wrongPasswordResponse.json(), { ok:false, error:"invalid_credentials" });
+
+const invalidConfigResponse = await login({
+  request:request("/api/ops/auth/login", { ip:"192.0.2.82", userAgent:"InvalidConfigTest/1", method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ password }) }),
+  env:{ ...env, OPS_PASSWORD_HASH:"invalid" }
 });
-assert.equal(debugBodyText.includes(passwordHash), false);
-assert.equal(debugBodyText.includes(sessionSecret), false);
-assert.equal(debugBodyText.includes(debugPassword), false);
+assert.equal(invalidConfigResponse.status, 503);
+assert.deepEqual(await invalidConfigResponse.json(), { ok:false, error:"auth_configuration_error" });
 
 const subtlePrototype = Object.getPrototypeOf(crypto.subtle);
 const originalDeriveBits = subtlePrototype.deriveBits;
@@ -98,27 +81,7 @@ try {
   assert.equal(cryptoFailureResponse.status, 503);
   const cryptoFailureText = await cryptoFailureResponse.text();
   const cryptoFailureBody = JSON.parse(cryptoFailureText);
-  assert.equal(cryptoFailureBody.error, "auth_configuration_error");
-  assert.equal(cryptoFailureBody.stage, "pbkdf2_derivation_failed");
-  assert.equal("cryptoErrorName" in cryptoFailureBody, false);
-  assert.equal("cryptoErrorMessage" in cryptoFailureBody, false);
-  assert.equal("cryptoErrorStage" in cryptoFailureBody, false);
-
-  const cryptoDebugResponse = await login({
-    request:request("/api/ops/auth/login", { ip:"192.0.2.84", userAgent:"CryptoDebugTest/1", method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ password }) }),
-    env:{ ...env, OPS_AUTH_DEBUG:"true" }
-  });
-  assert.equal(cryptoDebugResponse.status, 503);
-  const cryptoDebugText = await cryptoDebugResponse.text();
-  const cryptoDebugBody = JSON.parse(cryptoDebugText);
-  assert.equal(cryptoDebugBody.error, "auth_configuration_error");
-  assert.equal(cryptoDebugBody.cryptoErrorName, "OperationError");
-  assert.equal(cryptoDebugBody.cryptoErrorStage, "pbkdf2_derive_bits_failed");
-  assert.ok(cryptoDebugBody.cryptoErrorMessage.length <= 160);
-  assert.equal(cryptoDebugText.includes(password), false);
-  assert.equal(cryptoDebugText.includes(passwordHash), false);
-  assert.equal(cryptoDebugText.includes(sessionSecret), false);
-  assert.equal(cryptoDebugText.includes("stack"), false);
+  assert.deepEqual(cryptoFailureBody, { ok:false, error:"auth_configuration_error" });
 } finally {
   subtlePrototype.deriveBits = originalDeriveBits;
 }
@@ -130,47 +93,37 @@ subtlePrototype.importKey = async function () {
   throw error;
 };
 try {
-  const importFailure = await verifyPasswordWithDiagnostics(password, passwordHash);
-  assert.equal(importFailure.ok, false);
-  assert.equal(importFailure.stage, "pbkdf2_key_import_failed");
-  assert.equal(importFailure.cryptoErrorName, "DataError");
-  assert.equal(importFailure.cryptoErrorStage, "password_key_import_failed");
-  assert.ok(importFailure.cryptoErrorMessage.length <= 160);
-  assert.equal(importFailure.cryptoErrorMessage.includes(password), false);
+  const importFailureResponse = await login({
+    request:request("/api/ops/auth/login", { ip:"192.0.2.84", userAgent:"ImportFailureTest/1", method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ password }) }),
+    env
+  });
+  assert.equal(importFailureResponse.status, 503);
+  assert.deepEqual(await importFailureResponse.json(), { ok:false, error:"auth_configuration_error" });
 } finally {
   subtlePrototype.importKey = originalImportKey;
 }
 
 const badSessionResponse = await login({
-  request:request("/api/ops/auth/login", { ip:"192.0.2.81", userAgent:"DebugSessionTest/1", method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ password }) }),
+  request:request("/api/ops/auth/login", { ip:"192.0.2.81", userAgent:"BadSessionTest/1", method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ password }) }),
   env:{ ...env, OPS_SESSION_SECRET:"not-a-valid-session-secret" }
 });
 assert.equal(badSessionResponse.status, 503);
-assert.deepEqual(await badSessionResponse.json(), {
-  ok:false,
-  error:"auth_unavailable",
-  passwordHashRead:true,
-  sessionSecretRead:true,
-  passwordHashFingerprint:expectedFingerprint,
-  stage:"session_signing_failed"
-});
+assert.deepEqual(await badSessionResponse.json(), { ok:false, error:"auth_configuration_error" });
 
 const generated = spawnSync(process.execPath, ["scripts/generate-ops-secrets.mjs"], {
   cwd:new URL("..", import.meta.url),
-  env:{ ...process.env, OPS_PASSWORD:"fingerprint-test-password" },
+  env:{ ...process.env, OPS_PASSWORD:"generator-test-password" },
   encoding:"utf8"
 });
 assert.equal(generated.status, 0);
 const generatedHash = (generated.stdout.match(/^OPS_PASSWORD_HASH=(.+)$/m) || [])[1];
-const generatedFingerprint = (generated.stdout.match(/^OPS_PASSWORD_HASH_FINGERPRINT=([0-9a-f]{12})$/m) || [])[1];
+const generatedSessionSecret = (generated.stdout.match(/^OPS_SESSION_SECRET=(.+)$/m) || [])[1];
 assert.ok(generatedHash);
-assert.equal(generatedFingerprint, createHash("sha256").update(generatedHash, "utf8").digest("hex").slice(0, 12));
+assert.ok(generatedSessionSecret);
 
 const loginResponse = await login({ request:request("/api/ops/auth/login", { method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ password }) }), env });
 assert.equal(loginResponse.status, 200);
-const successfulBodyText = await loginResponse.clone().text();
-assert.equal(successfulBodyText.includes("passwordHashFingerprint"), false);
-assert.equal(successfulBodyText.includes("stage"), false);
+assert.deepEqual(await loginResponse.clone().json(), { ok:true });
 const setCookie = loginResponse.headers.get("Set-Cookie");
 assert.match(setCookie, /meg_ops_session=/);
 assert.match(setCookie, /HttpOnly/i);

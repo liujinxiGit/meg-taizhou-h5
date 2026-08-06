@@ -29,12 +29,6 @@ function base64ToBytes(value, urlSafe = false) {
 }
 
 function base64UrlEncode(bytes) { return bytesToBase64(bytes).replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_"); }
-function bytesToHex(bytes) { return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join(""); }
-
-export async function passwordHashFingerprint(encodedHash) {
-  const digest = new Uint8Array(await crypto.subtle.digest("SHA-256", encoder.encode(String(encodedHash || ""))));
-  return bytesToHex(digest).slice(0, 12);
-}
 
 export function constantTimeEqual(left, right) {
   const a = left instanceof Uint8Array ? left : new Uint8Array(left);
@@ -59,60 +53,28 @@ export function parsePasswordHash(encoded) {
   } catch { return null; }
 }
 
-function cryptoFailure(error, stage, cryptoErrorStage, sensitiveValues = []) {
-  const name = String(error && error.name || "Error").slice(0, 80);
-  let message = String(error && error.message || "Cryptographic operation failed");
-  for (const value of sensitiveValues) {
-    if (typeof value === "string" && value.length >= 4) message = message.split(value).join("[redacted]");
-  }
-  message = message.replace(/[A-Za-z0-9+/_-]{16,}={0,2}/g, "[redacted]").slice(0, 160);
-  return { ok:false, stage, cryptoErrorName:name, cryptoErrorMessage:message, cryptoErrorStage };
-}
-
-export async function verifyPasswordWithDiagnostics(password, encodedHash) {
-  if (typeof password !== "string" || password.length < 1 || password.length > 512) {
-    return { ok:false, stage:"password_input_invalid" };
-  }
+export async function verifyPassword(password, encodedHash) {
+  if (typeof password !== "string" || password.length < 1 || password.length > 512) return false;
   const parsed = parsePasswordHash(encodedHash);
-  if (!parsed) return { ok:false, stage:"password_hash_invalid" };
+  if (!parsed) return false;
   if (!Number.isSafeInteger(parsed.iterations) || !Number.isFinite(parsed.iterations) || parsed.iterations <= 0) {
-    return { ok:false, stage:"password_hash_invalid" };
+    return false;
   }
   const salt = new Uint8Array(parsed.salt);
-  let passwordKey;
-  try {
-    passwordKey = await crypto.subtle.importKey(
-      "raw",
-      new TextEncoder().encode(password),
-      { name:"PBKDF2" },
-      false,
-      ["deriveBits"]
-    );
-  } catch (error) {
-    return cryptoFailure(error, "pbkdf2_key_import_failed", "password_key_import_failed", [password, encodedHash]);
-  }
-  let derived;
-  try {
-    derived = new Uint8Array(await crypto.subtle.deriveBits({
-      name:"PBKDF2",
-      hash:"SHA-256",
-      salt,
-      iterations:parsed.iterations
-    }, passwordKey, 256));
-  } catch (error) {
-    return cryptoFailure(error, "pbkdf2_derivation_failed", "pbkdf2_derive_bits_failed", [password, encodedHash]);
-  }
-  return constantTimeEqual(derived, parsed.expected)
-    ? { ok:true, stage:"verified" }
-    : { ok:false, stage:"password_mismatch" };
-}
-
-export async function verifyPassword(password, encodedHash) {
-  const result = await verifyPasswordWithDiagnostics(password, encodedHash);
-  if (result.cryptoErrorStage) {
-    throw new Error(result.stage);
-  }
-  return result.ok;
+  const passwordKey = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(password),
+    { name:"PBKDF2" },
+    false,
+    ["deriveBits"]
+  );
+  const derived = new Uint8Array(await crypto.subtle.deriveBits({
+    name:"PBKDF2",
+    hash:"SHA-256",
+    salt,
+    iterations:parsed.iterations
+  }, passwordKey, 256));
+  return constantTimeEqual(derived, parsed.expected);
 }
 
 function sessionSecretBytes(secret) {
@@ -120,17 +82,6 @@ function sessionSecretBytes(secret) {
     const bytes = base64ToBytes(String(secret || ""), true);
     return bytes.length >= 32 && bytes.length <= 128 ? bytes : null;
   } catch { return null; }
-}
-
-export function inspectOpsAuthEnvironment(env = {}) {
-  const passwordHashRead = typeof env.OPS_PASSWORD_HASH === "string" && env.OPS_PASSWORD_HASH.length > 0;
-  const sessionSecretRead = typeof env.OPS_SESSION_SECRET === "string" && env.OPS_SESSION_SECRET.length > 0;
-  return {
-    passwordHashRead,
-    passwordHashFormatValid:passwordHashRead && Boolean(parsePasswordHash(env.OPS_PASSWORD_HASH)),
-    sessionSecretRead,
-    sessionSecretFormatValid:sessionSecretRead && Boolean(sessionSecretBytes(env.OPS_SESSION_SECRET))
-  };
 }
 
 async function importSessionKey(secret) {

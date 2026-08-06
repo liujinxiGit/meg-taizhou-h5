@@ -30,7 +30,6 @@ wranglerArgs.push(
   "--binding", `OPS_SESSION_SECRET=${sessionSecret}`,
   "--binding", `OPS_ORIGINS=${origin}`,
   "--binding", "LOCAL_DEV=true",
-  "--binding", "OPS_AUTH_DEBUG=false",
   "--ip", "127.0.0.1",
   "--port", String(port),
   "--inspector-port", String(inspectorPort),
@@ -77,8 +76,7 @@ try {
   const invalidResponse = await login(`${password}-wrong`);
   assert.equal(invalidResponse.status, 401);
   const invalidBody = await invalidResponse.json();
-  assert.equal(invalidBody.error, "invalid_credentials");
-  assert.equal(invalidBody.stage, "password_mismatch");
+  assert.deepEqual(invalidBody, { ok:false, error:"invalid_credentials" });
   console.log("wrangler-pages-pbkdf2-check: 100000 iterations passed in workerd");
 } finally {
   wrangler.kill("SIGTERM");
