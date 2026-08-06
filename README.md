@@ -2,7 +2,7 @@
 
 这是一个面向宣传单扫码用户的独立移动端活动页。用户可查看开业活动、在四项免费体验中选择一项、获得匿名预约编号、复制对应咨询话术，并通过店长微信二维码完成领取和预约。访客端不提供表单，不收集姓名、手机号、微信号、年龄、性别或健康信息。
 
-项目使用原生 HTML、CSS、JavaScript、Cloudflare Pages Functions 与 D1，不使用大型前端框架。内部后台产品为 **MEG Operations｜门店线索与预约工作台**，源码位于 `ops/`；正式规划域名为 `megops.jinxiliu.com`，生产环境必须由 Cloudflare Access 完整保护。
+项目使用原生 HTML、CSS、JavaScript、Cloudflare Pages Functions 与 D1，不使用大型前端框架。内部后台产品为 **MEG Operations｜门店线索与预约工作台**，源码位于 `ops/`；正式域名为 `megops.jinxiliu.com`。后台主认证方式为固定密码加 30 天 HttpOnly 签名 Cookie，Cloudflare Access JWT 仅作为迁移期可选兼容层。
 
 项目同时提供独立英文版 `en/index.html`，面向静安区附近希望进行 Open Gym 独立训练的英文用户。中文入口为 `/`，英文入口为 `/en/`，语言仅由用户主动切换。
 
@@ -28,7 +28,7 @@ meg-taizhou-h5/
 ├── config.js        门店、活动、项目和素材配置
 ├── _headers          Cloudflare Pages 的 HTML 禁止缓存规则
 ├── assets/          门店照片与店长二维码
-├── functions/       Pages Functions 公开 API、后台 API 与 Access JWT 校验
+├── functions/       Pages Functions 公开 API、后台 API 与共享认证逻辑
 ├── migrations/      D1 数据库迁移
 ├── ops/             MEG Operations 独立后台页面
 ├── wrangler.toml    活动页 Pages 配置模板
@@ -43,7 +43,7 @@ meg-taizhou-h5/
 
 ## 内容和素材配置
 
-当前静态资源版本号为 `20260804-7`。每次发布新版本时，统一更新中英文 `index.html` 中 CSS/JS/图片的 `?v=`、`config.js` 的 `assetVersion`，以及测试页和 ops 页面资源版本号。
+当前 H5 静态资源版本号为 `20260806-1`，Operations 静态资源版本号为 `20260806-3`。每次发布新版本时，统一更新对应 HTML 中 CSS/JS/图片的 `?v=` 与相关测试断言；H5 素材版本还需同步 `config.js` 的 `assetVersion`。
 
 日常会修改的信息集中在 `config.js`；会员价格、店长名称、微信号和二维码直接写在 `index.html`，确保 JavaScript 未加载时仍可见：
 
@@ -120,17 +120,42 @@ npx wrangler d1 migrations apply meg-operations --remote
 
 数据库 binding 必须命名为 `DB`。`migrations/0001_create_leads.sql` 创建 `leads` 与匿名状态历史表 `lead_status_history`，不包含姓名、手机号、微信号或 IP 字段。
 
-### 2. 本地开发
+### 2. 生成后台 Secret
 
-活动页、公开 API 和 `/ops/` 联调：
+在仓库根目录运行：
+
+```bash
+node scripts/generate-ops-secrets.mjs
+```
+
+脚本会隐藏交互式密码输入，并只在终端输出 `OPS_PASSWORD_HASH` 和 `OPS_SESSION_SECRET`，不会写入任何文件。非交互环境可通过临时的 `OPS_PASSWORD` 环境变量传入待哈希密码；不要使用会进入 shell history 的明文命令行参数。密码至少 12 个字符。
+
+密码哈希格式为：
+
+```text
+pbkdf2_sha256$210000$saltBase64$hashBase64
+```
+
+它使用 PBKDF2-HMAC-SHA-256、至少 16 字节随机 salt 和 32 字节输出。`OPS_SESSION_SECRET` 是 32 字节随机值的 base64url 编码。不要把脚本输出粘贴到 `wrangler.toml`、源码、README 或 Git 追踪文件。
+
+### 3. 本地开发
+
+活动页与公开 API 联调：
 
 ```bash
 npx wrangler pages dev . --d1 DB --binding LOCAL_DEV=true
 ```
 
-本地开发绕过只在 `LOCAL_DEV=true` 且主机名为 `localhost` 或 `127.0.0.1` 时生效。生产环境必须保持 `LOCAL_DEV=false`，代码中不存在 URL bypass 参数或默认密码。
+后台密码登录联调时，把生成的两个值手动放入 `ops/.dev.vars`（该文件已被 `.gitignore` 排除），然后运行：
 
-### 3. Pages 项目与 D1 binding
+```bash
+cd ops
+npx wrangler pages dev . --d1 DB --binding LOCAL_DEV=false
+```
+
+本地地址应同时加入 `OPS_ORIGINS`，例如在 `ops/.dev.vars` 中设置 `OPS_ORIGINS=http://localhost:8788`。本地开发绕过只在显式设置 `LOCAL_DEV=true` 且主机名为 `localhost` 或 `127.0.0.1` 时生效；要测试真实密码会话必须使用 `LOCAL_DEV=false`。生产环境必须保持 `LOCAL_DEV=false`，代码中不存在 URL bypass 参数或默认密码。
+
+### 4. Pages 项目与 D1 binding
 
 现有活动 Pages 项目继续使用仓库根目录作为输出，保留 `taizhou.jinxiliu.com`。在 **Workers & Pages → 现有活动项目 → Settings → Bindings** 中增加 D1 binding：
 
@@ -149,9 +174,9 @@ npx wrangler pages dev . --d1 DB --binding LOCAL_DEV=true
 
 > `wrangler.toml` 和 `wrangler.ops.toml` 是待填真实 Cloudflare ID 的部署模板。现有活动项目如已经在 Dashboard 配置过 Pages 选项，部署前应先核对或使用 `npx wrangler pages download config`，避免手写配置覆盖 Dashboard 中已有设置。
 
-### 4. 环境变量
+### 5. 环境变量与加密 Secret
 
-两个 Pages 项目的 Production 与 Preview 环境均需要核对以下变量：
+两个 Pages 项目的 Production 与 Preview 环境均需要核对以下非敏感变量：
 
 ```text
 PUBLIC_ORIGINS=https://taizhou.jinxiliu.com
@@ -161,25 +186,50 @@ CF_ACCESS_AUD=<Access Application Audience AUD>
 LOCAL_DEV=false
 ```
 
-不要在仓库中保存 Access Token、密码或允许登录的邮箱。`CF_ACCESS_AUD` 与 Team Domain 应在 Cloudflare Dashboard 配置；模板中的占位符不能直接用于生产。
+`CF_ACCESS_TEAM_DOMAIN` 与 `CF_ACCESS_AUD` 只用于可选的 Access JWT 兼容验证；停用 Access 后可以保留，代码不会要求浏览器必须带 Access JWT。
 
-### 5. Cloudflare Access
+进入 **Workers & Pages → 对应 Pages 项目 → Settings → Variables and Secrets → Add**，分别添加以下值，并选择 **Encrypt / Secret**：
 
-1. 进入 **Zero Trust → Access controls → Applications**。
-2. 新建 **Self-hosted** Application。
-3. Application domain 填写 `megops.jinxiliu.com`，Path 留空以保护全站。
-4. 添加 Allow policy，仅允许指定邮箱或指定邮箱域；允许邮箱只配置在 Access Policy，不写入前端。
-5. 在 Application 的 Additional settings 中复制 **Application Audience (AUD) Tag**，写入后台 Pages 项目的 `CF_ACCESS_AUD`。
-6. 把 Zero Trust Team Domain 名称写入 `CF_ACCESS_TEAM_DOMAIN`。
-7. 确认 Access 同时覆盖页面和 `/api/ops/*`。
+```text
+OPS_PASSWORD_HASH=<生成脚本输出的完整密码哈希>
+OPS_SESSION_SECRET=<生成脚本输出的随机会话密钥>
+```
 
-后台 API 还会在源站校验 `Cf-Access-Jwt-Assertion` 的签名、issuer、audience 与有效期。只有经过 Access 且 JWT 有效的请求才能读取或更新线索。
+至少给 `meg-operations` 的 Production 环境配置；如果 `meg-taizhou-h5` 仍部署兼容的 `/api/ops/*`，也给前台项目配置相同两个 Secret。需要测试 Preview 时单独给 Preview 配置。保存 Secret 后必须重新部署对应 Pages 项目，Functions 才能读取新值。严禁把 Secret 放进 Wrangler `[vars]`、前端文件或 Git。
 
-### 6. 绑定后台域名
+### 6. 后台密码会话
 
-在后台 Pages 项目 **Custom domains** 中添加 `megops.jinxiliu.com`。先完成 Access Application 与变量配置，再开放自定义域名。不要绑定 `admin.jinxiliu.com`，也不要使用活动域名的 `/admin` 路径。
+`POST /api/ops/auth/login` 在服务端校验密码哈希；成功后设置 `meg_ops_session` Cookie。Cookie 为 `HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=2592000`，前端 JavaScript 无法读取，内容是 30 天有效的 HMAC-SHA-256 签名载荷。Dashboard 启动时先调用 `GET /api/ops/auth/session`；只有自有 Cookie 有效才加载业务数据。`POST /api/ops/auth/logout` 会立即清除 Cookie。
 
-### 7. 查看数据与导出 CSV
+所有已有 `/api/ops/*` 业务接口仍会在源站调用统一的 `authorizeOps()`：有效自有 Cookie或有效 Access JWT 任一即可，同时继续执行 Origin、参数、D1 与 CSV 隐私校验。生产默认使用自有 Cookie。
+
+登录端点对同一 IP + User-Agent 的不可逆 SHA-256 短期哈希记录失败次数：5 分钟最多 5 次失败，第 6 次起返回 `429` 和 `Retry-After`，成功登录后清除计数；完整 IP、密码、密码哈希和会话 Secret 均不写日志或 D1。作为边缘层加固，建议在 **Security → WAF → Rate limiting rules** 为 URI Path 等于 `/api/ops/auth/login` 添加 5 分钟窗口的限流规则。WAF 规则按请求计数，应用层仍只按失败计数。
+
+### 7. Cloudflare Access 安全下线顺序
+
+不要先删除 Access。按以下顺序迁移：
+
+1. 为后台 Pages 添加加密的 `OPS_PASSWORD_HASH`。
+2. 添加加密的 `OPS_SESSION_SECRET`。
+3. 部署新版本，同时暂时保留现有 Access Application。
+4. 用 Access 允许的浏览器进入 `megops.jinxiliu.com`。
+5. 在 MEG 自有登录页输入密码，确认 Dashboard 和 30 天 Session 正常。
+6. 确认未带自有 Cookie时 `GET /api/ops/summary` 返回 `401`（测试时不要让请求携带 Access JWT）。
+7. 进入 **Zero Trust → Access controls → Applications**，停用或删除保护 `megops.jinxiliu.com` 的 Self-hosted Application。
+8. 用无痕窗口重新访问，确认直接出现 MEG 自有密码登录页，不再出现 Access 页面。
+9. 再次验证未登录 API 为 `401`、登录后 Dashboard/详情/状态/备注/回收站/CSV 正常。
+
+只要 Access 仍保护整个域名，访问者就会先看到 Access 页面；这是迁移期的预期行为。代码保留 Access JWT 签名、issuer、audience 与过期校验作为可选兼容层，但网页主流程不依赖 Access。
+
+### 8. 更换后台密码与强制退出
+
+重新运行 `node scripts/generate-ops-secrets.mjs`，把新的 `OPS_PASSWORD_HASH` 更新为加密 Secret 后重新部署即可换密码。仅更新密码哈希不会让已经签发的 Cookie 退出；如需强制所有浏览器重新登录，必须同时更新 `OPS_SESSION_SECRET`。更新 Session Secret 后，所有旧 Cookie 的签名都会立即失效。
+
+### 9. 绑定后台域名
+
+在后台 Pages 项目 **Custom domains** 中添加 `megops.jinxiliu.com`。开放自定义域名前先完成 D1、非敏感变量与两个加密 Secret 配置。迁移期间保留现有 Access Application，完成自有密码验证后再按上面的顺序停用。不要绑定 `admin.jinxiliu.com`，也不要使用活动域名的 `/admin` 路径。
+
+### 10. 查看数据与导出 CSV
 
 可在 **Workers & Pages → D1 → meg-operations → Console** 查看匿名数据，或执行：
 
@@ -187,13 +237,13 @@ LOCAL_DEV=false
 npx wrangler d1 execute meg-operations --remote --command "SELECT claim_code, created_at, service, source, status FROM leads ORDER BY created_at DESC LIMIT 50;"
 ```
 
-店长登录 MEG Operations 后，可按日期、门店、项目、来源、状态和语言筛选，并点击“导出 CSV”。CSV 只包含匿名线索字段，不包含姓名、手机号、微信号或 IP。
+店长通过 MEG 自有密码登录 Operations 后，可按日期、门店、项目、来源、状态和语言筛选，并点击“导出 CSV”。CSV 只包含匿名线索字段，不包含姓名、手机号、微信号或 IP。
 
-### 8. Migration 回滚
+### 11. Migration 回滚
 
 D1 migration 不提供自动 down migration。生产应用前先使用 D1 Time Travel/导出建立恢复点；需要撤销结构时，优先新增一个向前修复 migration。若必须恢复整个数据库，使用 Cloudflare D1 Time Travel 或已导出的备份，不要直接删除生产表。
 
-### 9. 隐私与防滥用
+### 12. 隐私与防滥用
 
 - 数据库不保存访客姓名、手机号、微信号、年龄、性别、健康状况或完整 IP。
 - 粗粒度设备与浏览器类别由服务端 User-Agent 推断。

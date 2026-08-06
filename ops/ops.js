@@ -24,6 +24,7 @@
 
   var document = root.document;
   var state = {
+    authenticated:false,
     filters:{}, page:1, pageSize:20, total:0, items:[], activeLead:null, view:"leads",
     trash:{ search:"", page:1, pageSize:20, total:0, items:[] }
   };
@@ -32,13 +33,37 @@
   function formatTime(value) { if (!value) return "—"; try { return new Intl.DateTimeFormat("zh-CN", { dateStyle:"short", timeStyle:"short", timeZone:"Asia/Shanghai" }).format(new Date(value)); } catch (error) { return value; } }
   function showToast(message) { var toast = document.getElementById("opsToast"); if (!toast) return; root.clearTimeout(toastTimer); toast.textContent = message; toast.classList.add("show"); toastTimer = root.setTimeout(function () { toast.classList.remove("show"); }, 2200); }
   function setAuth(ok, text) { var element = document.getElementById("authState"); if (!element) return; element.classList.toggle("ok", ok); element.classList.toggle("error", !ok); element.querySelector("span").textContent = text; }
-  function fetchJson(url, options) {
+  function resetDashboardState() {
+    state.authenticated = false; state.items = []; state.total = 0; state.activeLead = null; state.view = "leads";
+    state.trash = { search:"", page:1, pageSize:20, total:0, items:[] };
+    closeDetail();
+  }
+  function showLogin(message) {
+    resetDashboardState();
+    document.getElementById("loginScreen").hidden = false;
+    document.getElementById("opsHeader").hidden = true;
+    document.getElementById("dashboard").hidden = true;
+    document.getElementById("loginError").textContent = message || "";
+    root.setTimeout(function () { document.getElementById("opsPassword").focus(); }, 0);
+  }
+  function showDashboard() {
+    state.authenticated = true;
+    document.getElementById("loginScreen").hidden = true;
+    document.getElementById("opsHeader").hidden = false;
+    document.getElementById("dashboard").hidden = false;
+    document.getElementById("loginError").textContent = "";
+    setAuth(true, "已登录 · 30 天会话");
+  }
+  function fetchJson(url, options, suppressAuthReset) {
     return root.fetch(url, Object.assign({ credentials:"same-origin", headers:{ "Accept":"application/json" } }, options || {}, {
       headers:Object.assign({ "Accept":"application/json" }, (options && options.headers) || {})
     })).then(function (response) {
       return response.json().catch(function () { return {}; }).then(function (payload) {
-        if (response.status === 401) throw new Error("unauthorized");
-        if (!response.ok) throw new Error(payload.error || "request_failed");
+        if (response.status === 401) {
+          if (!suppressAuthReset) showLogin("登录已失效，请重新登录");
+          var unauthorized = new Error(payload.error || "unauthorized"); unauthorized.status = 401; throw unauthorized;
+        }
+        if (!response.ok) { var failure = new Error(payload.error || "request_failed"); failure.status = response.status; failure.retryAfter = response.headers.get("Retry-After") || ""; throw failure; }
         return payload;
       });
     });
@@ -89,7 +114,7 @@
     document.getElementById("trashPrevPage").disabled = state.trash.page <= 1;
     document.getElementById("trashNextPage").disabled = state.trash.page >= pages;
   }
-  function loadSummary() { return fetchJson("/api/ops/summary").then(function (data) { renderSummary(data); setAuth(true, "Cloudflare Access 登录有效"); }, function (error) { setAuth(false, error.message === "unauthorized" ? "未通过 Cloudflare Access 验证" : "后台 API 暂时不可用"); }); }
+  function loadSummary() { return fetchJson("/api/ops/summary").then(function (data) { renderSummary(data); setAuth(true, "已登录 · 30 天会话"); }, function (error) { if (error.status !== 401) setAuth(false, "后台 API 暂时不可用"); }); }
   function loadLeads() { var query = buildQuery(state.filters, state.page, state.pageSize); return fetchJson("/api/ops/leads?" + query).then(renderLeads).catch(function () { renderLeads({ items:[], total:0 }); showToast("线索列表加载失败"); }); }
   function loadTrash() { var query = buildQuery({ search:state.trash.search }, state.trash.page, state.trash.pageSize); return fetchJson("/api/ops/trash?" + query).then(renderTrash).catch(function () { renderTrash({ items:[], total:0 }); showToast("回收站加载失败"); }); }
   function refreshAll() { return Promise.all([loadSummary(), state.view === "trash" ? loadTrash() : loadLeads()]); }
@@ -120,6 +145,28 @@
     fetchJson("/api/ops/trash/" + encodeURIComponent(claimCode), { method:"DELETE", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ action:"purge", confirmation:entered }) }).then(function () { showToast("已永久删除"); refreshAll(); }).catch(function () { showToast("永久删除失败，请重试"); });
   }
 
+  function checkSession() {
+    return fetchJson("/api/ops/auth/session", { method:"GET" }, true).then(function (data) {
+      if (!data.authenticated) throw new Error("unauthorized");
+      showDashboard(); return refreshAll();
+    }).catch(function (error) {
+      showLogin(error.status === 401 ? "" : "后台暂时不可用，请稍后重试");
+    });
+  }
+
+  function downloadCsv() {
+    var params = new URLSearchParams(buildQuery(state.filters)); params.set("format", "csv");
+    root.fetch("/api/ops/leads?" + params.toString(), { credentials:"same-origin", headers:{ "Accept":"text/csv" } }).then(function (response) {
+      if (response.status === 401) { showLogin("登录已失效，请重新登录"); throw new Error("unauthorized"); }
+      if (!response.ok) throw new Error("export_failed");
+      return response.blob();
+    }).then(function (blob) {
+      var link = document.createElement("a"), url = URL.createObjectURL(blob);
+      link.href = url; link.download = "meg-operations-leads.csv"; document.body.appendChild(link); link.click(); link.remove();
+      root.setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    }).catch(function (error) { if (error.message !== "unauthorized") showToast("CSV 导出失败，请重试"); });
+  }
+
   document.addEventListener("click", function (event) {
     var target = event.target;
     var trashAction = target.closest && target.closest("[data-trash-action]");
@@ -142,10 +189,27 @@
     if (target.id === "nextPage" && state.page * state.pageSize < state.total) { state.page += 1; loadLeads(); return; }
     if (target.id === "trashPrevPage" && state.trash.page > 1) { state.trash.page -= 1; loadTrash(); return; }
     if (target.id === "trashNextPage" && state.trash.page * state.trash.pageSize < state.trash.total) { state.trash.page += 1; loadTrash(); return; }
-    if (target.id === "exportButton") { var params = new URLSearchParams(buildQuery(state.filters)); params.set("format", "csv"); root.location.href = "/api/ops/leads?" + params.toString(); }
+    if (target.id === "exportButton") { downloadCsv(); return; }
+    if (target.id === "logoutButton") {
+      fetchJson("/api/ops/auth/logout", { method:"POST" }, true).catch(function () {}).then(function () { showLogin(""); });
+    }
+  });
+  document.getElementById("loginForm").addEventListener("submit", function (event) {
+    event.preventDefault();
+    var passwordInput = document.getElementById("opsPassword"), button = document.getElementById("loginButton"), errorTarget = document.getElementById("loginError");
+    var password = passwordInput.value;
+    errorTarget.textContent = ""; button.disabled = true; button.textContent = "正在登录…";
+    fetchJson("/api/ops/auth/login", { method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ password:password }) }, true).then(function () {
+      document.getElementById("loginForm").reset(); showDashboard(); return refreshAll();
+    }).catch(function (error) {
+      if (error.status === 429) errorTarget.textContent = "尝试次数过多，请稍后再试";
+      else if (error.status === 401) errorTarget.textContent = "密码不正确，请重新输入";
+      else errorTarget.textContent = "登录服务暂时不可用，请稍后重试";
+      passwordInput.select();
+    }).then(function () { button.disabled = false; button.textContent = "登录"; });
   });
   document.getElementById("filterForm").addEventListener("submit", function (event) { event.preventDefault(); var data = new FormData(event.currentTarget); state.filters = {}; data.forEach(function (value, key) { if (String(value).trim()) state.filters[key] = String(value).trim(); }); state.page = 1; loadLeads(); });
   document.getElementById("trashFilterForm").addEventListener("submit", function (event) { event.preventDefault(); state.trash.search = document.getElementById("trashSearchInput").value.trim(); state.trash.page = 1; loadTrash(); });
   document.addEventListener("keydown", function (event) { if (event.key === "Escape") closeDetail(); });
-  refreshAll();
+  checkSession();
 })(typeof window !== "undefined" ? window : globalThis);

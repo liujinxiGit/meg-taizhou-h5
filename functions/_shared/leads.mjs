@@ -9,6 +9,7 @@ export const EVENT_STAGES = ["claim_opened", "message_copied", "wechat_qr_viewed
 export const STATUSES = ["new", "wechat_added", "booked", "visited", "converted", "duplicate", "invalid", "closed"];
 export const STORES = ["taizhou"];
 export const CAMPAIGNS = ["taizhou-opening-2026"];
+export { authorizeOps } from "./ops-auth.mjs";
 const CLAIM_ALPHABET = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
 const CREATE_FIELDS = ["service", "language", "source", "store", "campaign", "pagePath", "requestId", "clientId"];
 const CLIENT_ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -165,39 +166,6 @@ export async function saveDedupedResponse(requestId, payload) {
   if (!requestId || typeof caches === "undefined" || !caches.default) return;
   const key = await sha256(requestId);
   await caches.default.put(new Request(`https://meg-dedupe.invalid/${key}`), new Response(JSON.stringify(payload), { headers:{ "Cache-Control":"max-age=600" } }));
-}
-
-function base64UrlBytes(value) {
-  const normalized = value.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(value.length / 4) * 4, "=");
-  return Uint8Array.from(atob(normalized), (char) => char.charCodeAt(0));
-}
-
-function decodeJwtPart(value) { return JSON.parse(new TextDecoder().decode(base64UrlBytes(value))); }
-
-export async function authorizeOps(request, env) {
-  const url = new URL(request.url);
-  if (env.LOCAL_DEV === "true" && ["localhost", "127.0.0.1"].includes(url.hostname)) return { ok:true, local:true };
-  if (!allowedOrigins(env, true).includes(url.origin)) return { ok:false };
-  const token = request.headers.get("Cf-Access-Jwt-Assertion") || "";
-  const team = String(env.CF_ACCESS_TEAM_DOMAIN || "").replace(/^https?:\/\//, "").replace(/\.cloudflareaccess\.com.*$/, "");
-  const audience = String(env.CF_ACCESS_AUD || "");
-  if (!token || !team || !audience || team.startsWith("REPLACE_") || audience.startsWith("REPLACE_")) return { ok:false };
-  try {
-    const parts = token.split(".");
-    if (parts.length !== 3) return { ok:false };
-    const header = decodeJwtPart(parts[0]);
-    const payload = decodeJwtPart(parts[1]);
-    const issuer = `https://${team}.cloudflareaccess.com`;
-    const audiences = Array.isArray(payload.aud) ? payload.aud : [payload.aud];
-    const now = Math.floor(Date.now() / 1000);
-    if (payload.iss !== issuer || !audiences.includes(audience) || !payload.exp || payload.exp <= now) return { ok:false };
-    const certs = await fetch(`${issuer}/cdn-cgi/access/certs`, { cf:{ cacheTtl:3600, cacheEverything:true } }).then((response) => response.json());
-    const jwk = (certs.keys || []).find((key) => key.kid === header.kid);
-    if (!jwk) return { ok:false };
-    const key = await crypto.subtle.importKey("jwk", jwk, { name:"RSASSA-PKCS1-v1_5", hash:"SHA-256" }, false, ["verify"]);
-    const valid = await crypto.subtle.verify("RSASSA-PKCS1-v1_5", key, base64UrlBytes(parts[2]), new TextEncoder().encode(`${parts[0]}.${parts[1]}`));
-    return valid ? { ok:true, email:payload.email || "" } : { ok:false };
-  } catch { return { ok:false }; }
 }
 
 export function csvEscape(value) {

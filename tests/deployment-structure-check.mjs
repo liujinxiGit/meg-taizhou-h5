@@ -20,6 +20,9 @@ const trashAdapter = read("ops/functions/api/ops/trash.js");
 const trashDetailAdapter = read("ops/functions/api/ops/trash/[claimCode].js");
 const softDeleteAdapter = read("ops/functions/api/ops/leads/[claimCode]/trash.js");
 const duplicateAdapter = read("ops/functions/api/ops/leads/[claimCode]/duplicates.js");
+const loginAdapter = read("ops/functions/api/ops/auth/login.js");
+const sessionAdapter = read("ops/functions/api/ops/auth/session.js");
+const logoutAdapter = read("ops/functions/api/ops/auth/logout.js");
 
 check("1. Frontend Pages config remains rooted at repository output", /name\s*=\s*"meg-taizhou-h5"/.test(publicConfig) && /pages_build_output_dir\s*=\s*"\."/.test(publicConfig));
 check("2. Operations has an independent config inside ops", /name\s*=\s*"meg-operations"/.test(opsConfig) && /pages_build_output_dir\s*=\s*"\."/.test(opsConfig));
@@ -32,6 +35,7 @@ check("8. API adapters reuse handlers instead of duplicating backend logic", [su
 check("9. Existing explicit CLI config remains scoped to the ops output", /name\s*=\s*"meg-operations"/.test(explicitOpsConfig) && /pages_build_output_dir\s*=\s*"\.\/ops"/.test(explicitOpsConfig));
 check("10. Operations project reuses the root migration directory and same D1", /migrations_dir\s*=\s*"\.\.\/migrations"/.test(opsConfig) && opsConfig.includes("13bad6c0-ee9f-41bb-9b22-c488ce34ccc1"));
 check("11. Operations adapters expose trash and duplicate routes without copying logic", [trashAdapter,trashDetailAdapter,softDeleteAdapter,duplicateAdapter].every((source) => source.trim().startsWith("export {") && !source.includes("prepare(")));
+check("12. Operations adapters expose all shared password-session auth routes", [loginAdapter,sessionAdapter,logoutAdapter].every((source) => source.trim().startsWith("export {") && source.includes("functions/api/ops/auth/")));
 
 checks.forEach(([name, passed]) => console.log(`${passed ? "PASS" : "FAIL"}: ${name}`));
 if (checks.some(([, passed]) => !passed)) process.exit(1);
