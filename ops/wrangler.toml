@@ -6,6 +6,7 @@ pages_build_output_dir = "."
 binding = "DB"
 database_name = "meg-operations"
 database_id = "13bad6c0-ee9f-41bb-9b22-c488ce34ccc1"
+migrations_dir = "../migrations"
 
 [vars]
 PUBLIC_ORIGINS = "https://taizhou.jinxiliu.com"

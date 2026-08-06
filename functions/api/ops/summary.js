@@ -12,15 +12,17 @@ export async function onRequestGet({ request, env }) {
   const daysSinceMonday = (localNoon.getUTCDay() + 6) % 7;
   const weekStart = new Date(new Date(`${localDate}T00:00:00+08:00`).getTime() - daysSinceMonday * 86400000).toISOString();
   const since = new Date(Date.now() - 6 * 86400000).toLocaleDateString("en-CA", { timeZone:"Asia/Shanghai" });
+  const active = "deleted_at IS NULL AND status NOT IN ('duplicate', 'invalid')";
   try {
     const results = await env.DB.batch([
-      env.DB.prepare("SELECT COUNT(*) AS count FROM leads WHERE created_at >= ? AND created_at <= ?").bind(todayStart, todayEnd),
-      env.DB.prepare("SELECT COUNT(*) AS count FROM leads WHERE created_at >= ? AND created_at <= ?").bind(weekStart, todayEnd),
-      env.DB.prepare("SELECT status, COUNT(*) AS count FROM leads WHERE updated_at >= ? AND updated_at <= ? AND status IN ('wechat_added','booked','visited','converted') GROUP BY status").bind(todayStart, todayEnd),
-      env.DB.prepare("SELECT date(created_at, '+8 hours') AS date, COUNT(*) AS count FROM leads WHERE date(created_at, '+8 hours') >= ? GROUP BY date ORDER BY date ASC").bind(since),
-      env.DB.prepare("SELECT service, COUNT(*) AS count FROM leads GROUP BY service ORDER BY count DESC"),
-      env.DB.prepare("SELECT source, COUNT(*) AS count FROM leads GROUP BY source ORDER BY count DESC LIMIT 20"),
-      env.DB.prepare("SELECT language, COUNT(*) AS count FROM leads GROUP BY language ORDER BY language ASC")
+      env.DB.prepare(`SELECT COUNT(*) AS count FROM leads WHERE ${active} AND created_at >= ? AND created_at <= ?`).bind(todayStart, todayEnd),
+      env.DB.prepare(`SELECT COUNT(*) AS count FROM leads WHERE ${active} AND created_at >= ? AND created_at <= ?`).bind(weekStart, todayEnd),
+      env.DB.prepare(`SELECT status, COUNT(*) AS count FROM leads WHERE ${active} AND updated_at >= ? AND updated_at <= ? AND status IN ('wechat_added','booked','visited','converted') GROUP BY status`).bind(todayStart, todayEnd),
+      env.DB.prepare(`SELECT date(created_at, '+8 hours') AS date, COUNT(*) AS count FROM leads WHERE ${active} AND date(created_at, '+8 hours') >= ? GROUP BY date ORDER BY date ASC`).bind(since),
+      env.DB.prepare(`SELECT service, COUNT(*) AS count FROM leads WHERE ${active} GROUP BY service ORDER BY count DESC`),
+      env.DB.prepare(`SELECT source, COUNT(*) AS count FROM leads WHERE ${active} GROUP BY source ORDER BY count DESC LIMIT 20`),
+      env.DB.prepare(`SELECT language, COUNT(*) AS count FROM leads WHERE ${active} GROUP BY language ORDER BY language ASC`),
+      env.DB.prepare("SELECT COUNT(*) AS count FROM leads WHERE deleted_at IS NOT NULL")
     ]);
     const status = Object.fromEntries((results[2].results || []).map((row) => [row.status, Number(row.count)]));
     const todayBookings = Number(results[0].results?.[0]?.count || 0);
@@ -37,7 +39,8 @@ export async function onRequestGet({ request, env }) {
       trend7d:results[3].results || [],
       services:results[4].results || [],
       sources:results[5].results || [],
-      languages:results[6].results || []
+      languages:results[6].results || [],
+      trashCount:Number(results[7].results?.[0]?.count || 0)
     });
   } catch { return jsonResponse({ ok:false, error:"query_failed" }, 500); }
 }

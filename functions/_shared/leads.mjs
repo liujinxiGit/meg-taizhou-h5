@@ -6,11 +6,12 @@ export const SERVICES = [
 ];
 export const LANGUAGES = ["zh-CN", "en"];
 export const EVENT_STAGES = ["claim_opened", "message_copied", "wechat_qr_viewed"];
-export const STATUSES = ["new", "wechat_added", "booked", "visited", "converted", "invalid", "closed"];
+export const STATUSES = ["new", "wechat_added", "booked", "visited", "converted", "duplicate", "invalid", "closed"];
 export const STORES = ["taizhou"];
 export const CAMPAIGNS = ["taizhou-opening-2026"];
 const CLAIM_ALPHABET = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
-const CREATE_FIELDS = ["service", "language", "source", "store", "campaign", "pagePath", "requestId"];
+const CREATE_FIELDS = ["service", "language", "source", "store", "campaign", "pagePath", "requestId", "clientId"];
+const CLIENT_ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export function jsonResponse(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
@@ -54,6 +55,8 @@ export function validateCreatePayload(input) {
   if (pagePath.length > 160 || !/^\/[A-Za-z0-9_./-]*$/.test(pagePath)) return { ok:false, error:"invalid_page_path" };
   const requestId = String(input.requestId || "");
   if (requestId && (requestId.length > 80 || !/^[A-Za-z0-9_-]+$/.test(requestId))) return { ok:false, error:"invalid_request_id" };
+  const clientId = String(input.clientId || "").trim().toLowerCase();
+  if (clientId && (clientId.length !== 36 || !CLIENT_ID_PATTERN.test(clientId))) return { ok:false, error:"invalid_client_id" };
   return {
     ok:true,
     value:{
@@ -63,9 +66,15 @@ export function validateCreatePayload(input) {
       store,
       campaign,
       pagePath,
-      requestId
+      requestId,
+      clientId
     }
   };
+}
+
+export function isClientId(value) {
+  const clientId = String(value || "").trim();
+  return clientId.length === 36 && CLIENT_ID_PATTERN.test(clientId);
 }
 
 export function validateOpsPatch(input) {

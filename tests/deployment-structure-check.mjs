@@ -16,6 +16,10 @@ const opsHeaders = read("ops/_headers");
 const summaryAdapter = read("ops/functions/api/ops/summary.js");
 const listAdapter = read("ops/functions/api/ops/leads.js");
 const detailAdapter = read("ops/functions/api/ops/leads/[claimCode].js");
+const trashAdapter = read("ops/functions/api/ops/trash.js");
+const trashDetailAdapter = read("ops/functions/api/ops/trash/[claimCode].js");
+const softDeleteAdapter = read("ops/functions/api/ops/leads/[claimCode]/trash.js");
+const duplicateAdapter = read("ops/functions/api/ops/leads/[claimCode]/duplicates.js");
 
 check("1. Frontend Pages config remains rooted at repository output", /name\s*=\s*"meg-taizhou-h5"/.test(publicConfig) && /pages_build_output_dir\s*=\s*"\."/.test(publicConfig));
 check("2. Operations has an independent config inside ops", /name\s*=\s*"meg-operations"/.test(opsConfig) && /pages_build_output_dir\s*=\s*"\."/.test(opsConfig));
@@ -26,6 +30,8 @@ check("6. Operations headers target root static assets", opsHeaders.includes("/i
 check("7. Operations Pages Functions expose all existing API routes", summaryAdapter.includes("functions/api/ops/summary.js") && listAdapter.includes("functions/api/ops/leads.js") && detailAdapter.includes("functions/api/ops/leads/[claimCode].js"));
 check("8. API adapters reuse handlers instead of duplicating backend logic", [summaryAdapter,listAdapter,detailAdapter].every((source) => source.trim().startsWith("export {") && !source.includes("prepare(")));
 check("9. Existing explicit CLI config remains scoped to the ops output", /name\s*=\s*"meg-operations"/.test(explicitOpsConfig) && /pages_build_output_dir\s*=\s*"\.\/ops"/.test(explicitOpsConfig));
+check("10. Operations project reuses the root migration directory and same D1", /migrations_dir\s*=\s*"\.\.\/migrations"/.test(opsConfig) && opsConfig.includes("13bad6c0-ee9f-41bb-9b22-c488ce34ccc1"));
+check("11. Operations adapters expose trash and duplicate routes without copying logic", [trashAdapter,trashDetailAdapter,softDeleteAdapter,duplicateAdapter].every((source) => source.trim().startsWith("export {") && !source.includes("prepare(")));
 
 checks.forEach(([name, passed]) => console.log(`${passed ? "PASS" : "FAIL"}: ${name}`));
 if (checks.some(([, passed]) => !passed)) process.exit(1);

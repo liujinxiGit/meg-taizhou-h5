@@ -34,12 +34,12 @@ const checks = [
   ["22. HTML cache headers cover both languages", headers.includes("/index.html") && headers.includes("/en/index.html") && (headers.match(/no-cache, no-store, must-revalidate/g) || []).length >= 4],
   ["FAQ is bilingual and accordion-based", [zh, en].every(html => (html.match(/js-faq-toggle/g) || []).length === 6) && app.includes('target.closest(".js-faq-toggle")')],
   ["Non-hero images use lazy loading", [zh, en].every(html => (html.match(/loading="lazy"/g) || []).length >= 20)],
-  ["Hero image is preloaded", [zh, en].every(html => html.includes('rel="preload" as="image"') && html.includes("hero.webp?v=20260804-7"))],
+  ["Hero image is preloaded", [zh, en].every(html => html.includes('rel="preload" as="image"') && html.includes("hero.webp?v=20260806-1"))],
   ["Facility galleries include swipe hints", zh.includes("左右滑动查看更多门店图片") && en.includes("Swipe to view more gym photos")],
   ["Four main Chinese training modes are visible", zh.includes("四种训练方式") && zh.includes("左右滑动查看四种训练方式") && zh.includes("<span class=\"card-no\">04</span><h3>拳击训练</h3>")],
   ["Language switch stays fully visible on mobile", css.includes(".language-switch .language-current,.language-switch .language-full,.language-switch i{display:inline}") && css.includes(".language-switch .language-short{display:none}")],
   ["Language switch preserves source", app.includes('languageUrl.searchParams.set("source", source)')],
-  ["Static resources share cache version 20260804-7", [zh, en].every(html => html.includes("/styles.css?v=20260804-7") && html.includes("/app.js?v=20260804-7"))]
+  ["Static resources share cache version 20260806-1", [zh, en].every(html => html.includes("/styles.css?v=20260806-1") && html.includes("/app.js?v=20260806-1"))]
 ];
 
 checks.forEach(([name, passed]) => console.log(`${passed ? "PASS" : "FAIL"}: ${name}`));

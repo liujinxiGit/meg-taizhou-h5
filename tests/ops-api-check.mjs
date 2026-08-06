@@ -23,7 +23,8 @@ class SummaryDb {
       { results:[{ count:3 }] }, { results:[{ count:9 }] },
       { results:[{ status:"booked", count:2 }, { status:"visited", count:1 }] },
       { results:[{ date:"2026-08-04", count:3 }] }, { results:[{ service:"boxing", count:3 }] },
-      { results:[{ source:"direct", count:3 }] }, { results:[{ language:"zh-CN", count:3 }] }
+      { results:[{ source:"direct", count:3 }] }, { results:[{ language:"zh-CN", count:3 }] },
+      { results:[{ count:1 }] }
     ];
   }
 }
@@ -33,6 +34,7 @@ const summaryResponse = await getSummary({ request:localRequest("/api/ops/summar
 const summary = await summaryResponse.json();
 check("1. Summary API returns today and current-week bookings", summaryResponse.status === 200 && summary.bookings.today === 3 && summary.bookings.week === 9);
 check("2. Summary API keeps status, trend and breakdown data", summary.today.booked === 2 && summary.today.visited === 1 && summary.trend7d.length === 1 && summary.services.length === 1);
+check("2b. Summary API returns a separate trash count", summary.trashCount === 1);
 check("3. Current-week query starts on Monday and ends today", summaryDb.statements[1].values.length === 2 && new Date(summaryDb.statements[1].values[0]).getUTCDay() === 0);
 
 class ListDb {

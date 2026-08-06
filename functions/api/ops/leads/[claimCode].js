@@ -5,10 +5,23 @@ import {
 const PUBLIC_COLUMNS = "claim_code, created_at, updated_at, store, campaign, service, language, source, page_path, device_type, browser_family, event_stage, status, note, status_changed_at";
 
 async function loadLead(env, claimCode) {
-  const lead = await env.DB.prepare(`SELECT ${PUBLIC_COLUMNS} FROM leads WHERE claim_code = ?`).bind(claimCode).first();
+  const lead = await env.DB.prepare(`
+    SELECT ${PUBLIC_COLUMNS}, suspicious_group_id FROM leads
+    WHERE claim_code = ? AND deleted_at IS NULL
+  `).bind(claimCode).first();
   if (!lead) return null;
   const history = await env.DB.prepare("SELECT from_status, to_status, changed_at FROM lead_status_history WHERE claim_code = ? ORDER BY changed_at ASC, id ASC").bind(claimCode).all();
-  return { ...lead, status_history:history.results || [] };
+  let suspiciousGroup = [];
+  if (lead.suspicious_group_id) {
+    const grouped = await env.DB.prepare(`
+      SELECT claim_code, service, created_at, status FROM leads
+      WHERE suspicious_group_id = ? AND deleted_at IS NULL
+      ORDER BY created_at ASC
+    `).bind(lead.suspicious_group_id).all();
+    suspiciousGroup = grouped.results || [];
+  }
+  delete lead.suspicious_group_id;
+  return { ...lead, suspicious_count:suspiciousGroup.length, suspicious_group:suspiciousGroup, status_history:history.results || [] };
 }
 
 async function authorize(request, env) {
@@ -42,7 +55,7 @@ export async function onRequestPatch({ request, env, params }) {
   const validation = validateOpsPatch(input);
   if (!validation.ok) return jsonResponse({ ok:false, error:validation.error }, 400);
   try {
-    const existing = await env.DB.prepare("SELECT status, note, status_changed_at FROM leads WHERE claim_code = ?").bind(claimCode).first();
+    const existing = await env.DB.prepare("SELECT status, note, status_changed_at FROM leads WHERE claim_code = ? AND deleted_at IS NULL").bind(claimCode).first();
     if (!existing) return jsonResponse({ ok:false, error:"not_found" }, 404);
     const now = new Date().toISOString();
     const status = validation.value.status === undefined ? existing.status : validation.value.status;

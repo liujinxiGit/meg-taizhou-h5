@@ -101,6 +101,22 @@
     var reference = claimCode ? (normalizedLanguage === "en" ? "Booking reference: " : "预约编号：") + claimCode : "";
     return [String(baseMessage || "").trim(), reference, closing].filter(Boolean).join("\n\n");
   }
+  function isAnonymousClientId(value) {
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value || ""));
+  }
+  function createAnonymousClientId(cryptoApi) {
+    try {
+      if (cryptoApi && typeof cryptoApi.randomUUID === "function") return cryptoApi.randomUUID().toLowerCase();
+      if (cryptoApi && typeof cryptoApi.getRandomValues === "function") {
+        var bytes = cryptoApi.getRandomValues(new Uint8Array(16));
+        bytes[6] = (bytes[6] & 15) | 64;
+        bytes[8] = (bytes[8] & 63) | 128;
+        var hex = Array.prototype.map.call(bytes, function (byte) { return byte.toString(16).padStart(2, "0"); });
+        return hex.slice(0, 4).join("") + "-" + hex.slice(4, 6).join("") + "-" + hex.slice(6, 8).join("") + "-" + hex.slice(8, 10).join("") + "-" + hex.slice(10).join("");
+      }
+    } catch (error) {}
+    return "";
+  }
 
   root.MEG_EXPERIENCE_CONTENT = EXPERIENCE_CONTENT;
   root.MEG_UTILS = {
@@ -114,7 +130,9 @@
     imageFallback:imageFallback,
     normalizeLanguage:normalizeLanguage,
     mapLeadService:mapLeadService,
-    buildBookingMessage:buildBookingMessage
+    buildBookingMessage:buildBookingMessage,
+    isAnonymousClientId:isAnonymousClientId,
+    createAnonymousClientId:createAnonymousClientId
   };
 
   if (!root.document) return;
@@ -174,6 +192,19 @@
       var requestId = "meg_" + service + "_" + random;
       sessionSet("megLeadRequest:" + service, requestId);
       return requestId;
+    }
+    function getAnonymousClientId() {
+      var key = "megAnonymousClientId";
+      var existing = "";
+      if (storage) {
+        try { existing = storage.getItem(key) || ""; } catch (error) { existing = ""; }
+      }
+      if (isAnonymousClientId(existing)) return existing.toLowerCase();
+      var generated = createAnonymousClientId(root.crypto);
+      if (generated && storage) {
+        try { storage.setItem(key, generated); } catch (error) {}
+      }
+      return generated;
     }
     function trackEvent(name, details) {
       var logs = safeGet("eventLogs", []);
@@ -273,7 +304,8 @@
         store:"taizhou",
         campaign:"taizhou-opening-2026",
         pagePath:(root.location && root.location.pathname) || "/",
-        requestId:requestId
+        requestId:requestId,
+        clientId:getAnonymousClientId()
       };
       var timeoutPromise = new Promise(function (_, reject) {
         root.setTimeout(function () { reject(new Error("request_timeout")); }, 5500);
