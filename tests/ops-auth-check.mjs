@@ -57,22 +57,20 @@ assert.deepEqual(inspectOpsAuthEnvironment(env), {
 });
 assert.equal((await verifyPasswordWithDiagnostics(`${password}-wrong`, passwordHash)).stage, "password_mismatch");
 
-const debugEnv = { ...env, OPS_AUTH_DEBUG:"true" };
 const debugPassword = `${password}-diagnostic-wrong`;
 const debugResponse = await login({
   request:request("/api/ops/auth/login", { ip:"192.0.2.80", userAgent:"DebugTest/1", method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ password:debugPassword }) }),
-  env:debugEnv
+  env
 });
 assert.equal(debugResponse.status, 401);
 const debugBodyText = await debugResponse.text();
 const debugBody = JSON.parse(debugBodyText);
-assert.deepEqual(debugBody.debug, {
+assert.deepEqual(debugBody, {
+  ok:false,
+  error:"invalid_credentials",
   passwordHashRead:true,
-  passwordHashFormatValid:true,
   sessionSecretRead:true,
-  sessionSecretFormatValid:true,
   passwordHashFingerprint:expectedFingerprint,
-  passwordRead:true,
   stage:"password_mismatch"
 });
 assert.equal(debugBodyText.includes(passwordHash), false);
@@ -81,28 +79,17 @@ assert.equal(debugBodyText.includes(debugPassword), false);
 
 const badSessionResponse = await login({
   request:request("/api/ops/auth/login", { ip:"192.0.2.81", userAgent:"DebugSessionTest/1", method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ password }) }),
-  env:{ ...debugEnv, OPS_SESSION_SECRET:"not-a-valid-session-secret" }
+  env:{ ...env, OPS_SESSION_SECRET:"not-a-valid-session-secret" }
 });
 assert.equal(badSessionResponse.status, 503);
-assert.deepEqual((await badSessionResponse.json()).debug, {
+assert.deepEqual(await badSessionResponse.json(), {
+  ok:false,
+  error:"auth_unavailable",
   passwordHashRead:true,
-  passwordHashFormatValid:true,
   sessionSecretRead:true,
-  sessionSecretFormatValid:false,
   passwordHashFingerprint:expectedFingerprint,
-  passwordRead:true,
   stage:"session_signing_failed"
 });
-
-const noDebugResponse = await login({
-  request:request("/api/ops/auth/login", { ip:"192.0.2.82", userAgent:"NoDebugTest/1", method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ password:`${password}-wrong-no-debug` }) }),
-  env
-});
-assert.equal(noDebugResponse.status, 401);
-const noDebugBodyText = await noDebugResponse.text();
-assert.equal(noDebugBodyText.includes("debug"), false);
-assert.equal(noDebugBodyText.includes("passwordHashFingerprint"), false);
-assert.equal(noDebugBodyText.includes(expectedFingerprint), false);
 
 const generated = spawnSync(process.execPath, ["scripts/generate-ops-secrets.mjs"], {
   cwd:new URL("..", import.meta.url),
@@ -117,6 +104,9 @@ assert.equal(generatedFingerprint, createHash("sha256").update(generatedHash, "u
 
 const loginResponse = await login({ request:request("/api/ops/auth/login", { method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ password }) }), env });
 assert.equal(loginResponse.status, 200);
+const successfulBodyText = await loginResponse.clone().text();
+assert.equal(successfulBodyText.includes("passwordHashFingerprint"), false);
+assert.equal(successfulBodyText.includes("stage"), false);
 const setCookie = loginResponse.headers.get("Set-Cookie");
 assert.match(setCookie, /meg_ops_session=/);
 assert.match(setCookie, /HttpOnly/i);
