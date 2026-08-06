@@ -128,7 +128,7 @@ npx wrangler d1 migrations apply meg-operations --remote
 node scripts/generate-ops-secrets.mjs
 ```
 
-脚本会隐藏交互式密码输入，并只在终端输出 `OPS_PASSWORD_HASH` 和 `OPS_SESSION_SECRET`，不会写入任何文件。非交互环境可通过临时的 `OPS_PASSWORD` 环境变量传入待哈希密码；不要使用会进入 shell history 的明文命令行参数。密码至少 12 个字符。
+脚本会隐藏交互式密码输入，并只在终端输出 `OPS_PASSWORD_HASH`、`OPS_PASSWORD_HASH_FINGERPRINT` 和 `OPS_SESSION_SECRET`，不会写入任何文件。指纹是完整密码 Hash 字符串的 SHA-256 前 12 位十六进制，只用于与安全诊断返回值比对。非交互环境可通过临时的 `OPS_PASSWORD` 环境变量传入待哈希密码；不要使用会进入 shell history 的明文命令行参数。密码至少 12 个字符。
 
 密码哈希格式为：
 
@@ -137,6 +137,8 @@ pbkdf2_sha256$210000$saltBase64$hashBase64
 ```
 
 它使用 PBKDF2-HMAC-SHA-256、至少 16 字节随机 salt 和 32 字节输出。`OPS_SESSION_SECRET` 是 32 字节随机值的 base64url 编码。不要把脚本输出粘贴到 `wrangler.toml`、源码、README 或 Git 追踪文件。
+
+登录故障排查时，可临时给后台 Pages Production 增加普通环境变量 `OPS_AUTH_DEBUG=true` 并重新部署。登录 API 的 JSON 响应会额外包含 `debug`：只报告两个 Secret 是否读取成功、格式是否合法、密码 Hash 的 12 位 SHA-256 指纹、是否收到密码以及失败阶段，不会返回 Secret、哈希、salt 或密码内容。排查结束后删除该变量并再次部署。`password_mismatch` 表示 Functions 已读取合法哈希且 PBKDF2 已成功执行，但当前输入密码与已部署哈希不对应；`session_signing_failed` 表示密码已通过、问题发生在 Session Secret 或签名阶段。
 
 ### 3. 本地开发
 

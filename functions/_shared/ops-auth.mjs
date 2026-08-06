@@ -29,6 +29,12 @@ function base64ToBytes(value, urlSafe = false) {
 }
 
 function base64UrlEncode(bytes) { return bytesToBase64(bytes).replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_"); }
+function bytesToHex(bytes) { return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join(""); }
+
+export async function passwordHashFingerprint(encodedHash) {
+  const digest = new Uint8Array(await crypto.subtle.digest("SHA-256", encoder.encode(String(encodedHash || ""))));
+  return bytesToHex(digest).slice(0, 12);
+}
 
 export function constantTimeEqual(left, right) {
   const a = left instanceof Uint8Array ? left : new Uint8Array(left);
@@ -53,13 +59,35 @@ export function parsePasswordHash(encoded) {
   } catch { return null; }
 }
 
-export async function verifyPassword(password, encodedHash) {
-  if (typeof password !== "string" || password.length < 1 || password.length > 512) return false;
+export async function verifyPasswordWithDiagnostics(password, encodedHash) {
+  if (typeof password !== "string" || password.length < 1 || password.length > 512) {
+    return { ok:false, stage:"password_input_invalid" };
+  }
   const parsed = parsePasswordHash(encodedHash);
-  if (!parsed) return false;
-  const material = await crypto.subtle.importKey("raw", encoder.encode(password), "PBKDF2", false, ["deriveBits"]);
-  const derived = new Uint8Array(await crypto.subtle.deriveBits({ name:"PBKDF2", hash:"SHA-256", salt:parsed.salt, iterations:parsed.iterations }, material, 256));
-  return constantTimeEqual(derived, parsed.expected);
+  if (!parsed) return { ok:false, stage:"password_hash_invalid" };
+  let material;
+  try {
+    material = await crypto.subtle.importKey("raw", encoder.encode(password), "PBKDF2", false, ["deriveBits"]);
+  } catch {
+    return { ok:false, stage:"pbkdf2_key_import_failed" };
+  }
+  let derived;
+  try {
+    derived = new Uint8Array(await crypto.subtle.deriveBits({ name:"PBKDF2", hash:"SHA-256", salt:parsed.salt, iterations:parsed.iterations }, material, 256));
+  } catch {
+    return { ok:false, stage:"pbkdf2_derivation_failed" };
+  }
+  return constantTimeEqual(derived, parsed.expected)
+    ? { ok:true, stage:"verified" }
+    : { ok:false, stage:"password_mismatch" };
+}
+
+export async function verifyPassword(password, encodedHash) {
+  const result = await verifyPasswordWithDiagnostics(password, encodedHash);
+  if (result.stage === "pbkdf2_key_import_failed" || result.stage === "pbkdf2_derivation_failed") {
+    throw new Error(result.stage);
+  }
+  return result.ok;
 }
 
 function sessionSecretBytes(secret) {
@@ -67,6 +95,17 @@ function sessionSecretBytes(secret) {
     const bytes = base64ToBytes(String(secret || ""), true);
     return bytes.length >= 32 && bytes.length <= 128 ? bytes : null;
   } catch { return null; }
+}
+
+export function inspectOpsAuthEnvironment(env = {}) {
+  const passwordHashRead = typeof env.OPS_PASSWORD_HASH === "string" && env.OPS_PASSWORD_HASH.length > 0;
+  const sessionSecretRead = typeof env.OPS_SESSION_SECRET === "string" && env.OPS_SESSION_SECRET.length > 0;
+  return {
+    passwordHashRead,
+    passwordHashFormatValid:passwordHashRead && Boolean(parsePasswordHash(env.OPS_PASSWORD_HASH)),
+    sessionSecretRead,
+    sessionSecretFormatValid:sessionSecretRead && Boolean(sessionSecretBytes(env.OPS_SESSION_SECRET))
+  };
 }
 
 async function importSessionKey(secret) {

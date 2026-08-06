@@ -1,4 +1,4 @@
-import { pbkdf2Sync, randomBytes } from "node:crypto";
+import { createHash, pbkdf2Sync, randomBytes } from "node:crypto";
 import { emitKeypressEvents } from "node:readline";
 
 const ITERATIONS = 210000;
@@ -39,8 +39,11 @@ try {
   if (password.length < 12 || password.length > 512) throw new Error("密码长度必须为 12–512 个字符。");
   const salt = randomBytes(16);
   const hash = pbkdf2Sync(password, salt, ITERATIONS, 32, "sha256");
+  const passwordHash = `pbkdf2_sha256$${ITERATIONS}$${salt.toString("base64")}$${hash.toString("base64")}`;
+  const passwordHashFingerprint = createHash("sha256").update(passwordHash, "utf8").digest("hex").slice(0, 12);
   const sessionSecret = randomBytes(32).toString("base64url");
-  process.stdout.write(`OPS_PASSWORD_HASH=pbkdf2_sha256$${ITERATIONS}$${salt.toString("base64")}$${hash.toString("base64")}\n`);
+  process.stdout.write(`OPS_PASSWORD_HASH=${passwordHash}\n`);
+  process.stdout.write(`OPS_PASSWORD_HASH_FINGERPRINT=${passwordHashFingerprint}\n`);
   process.stdout.write(`OPS_SESSION_SECRET=${sessionSecret}\n`);
 } catch (error) {
   process.stderr.write(`${error.message}\n`);

@@ -1,12 +1,15 @@
 import assert from "node:assert/strict";
-import { pbkdf2Sync, randomBytes, webcrypto } from "node:crypto";
+import { createHash, pbkdf2Sync, randomBytes, webcrypto } from "node:crypto";
+import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { onRequestPost as login } from "../functions/api/ops/auth/login.js";
 import { onRequestGet as session } from "../functions/api/ops/auth/session.js";
 import { onRequestPost as logout } from "../functions/api/ops/auth/logout.js";
 import { onRequestGet as summary } from "../functions/api/ops/summary.js";
 import {
-  OPS_SESSION_MAX_AGE, createSessionToken, getLoginFailureCount, parsePasswordHash, verifyPassword, verifySessionToken
+  OPS_SESSION_MAX_AGE, createSessionToken, getLoginFailureCount, inspectOpsAuthEnvironment,
+  parsePasswordHash, passwordHashFingerprint, verifyPassword, verifyPasswordWithDiagnostics,
+  verifySessionToken
 } from "../functions/_shared/ops-auth.mjs";
 
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -42,6 +45,75 @@ function cookieValue(setCookie) { return String(setCookie || "").split(";", 1)[0
 assert.ok(parsePasswordHash(passwordHash));
 assert.equal(await verifyPassword(password, passwordHash), true);
 assert.equal(await verifyPassword(`${password}-wrong`, passwordHash), false);
+const expectedFingerprint = createHash("sha256").update(passwordHash, "utf8").digest("hex").slice(0, 12);
+assert.equal(await passwordHashFingerprint(passwordHash), expectedFingerprint);
+assert.equal(await passwordHashFingerprint(passwordHash), await passwordHashFingerprint(passwordHash));
+assert.notEqual(await passwordHashFingerprint(passwordHash), await passwordHashFingerprint(`${passwordHash}different`));
+assert.deepEqual(inspectOpsAuthEnvironment(env), {
+  passwordHashRead:true,
+  passwordHashFormatValid:true,
+  sessionSecretRead:true,
+  sessionSecretFormatValid:true
+});
+assert.equal((await verifyPasswordWithDiagnostics(`${password}-wrong`, passwordHash)).stage, "password_mismatch");
+
+const debugEnv = { ...env, OPS_AUTH_DEBUG:"true" };
+const debugPassword = `${password}-diagnostic-wrong`;
+const debugResponse = await login({
+  request:request("/api/ops/auth/login", { ip:"192.0.2.80", userAgent:"DebugTest/1", method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ password:debugPassword }) }),
+  env:debugEnv
+});
+assert.equal(debugResponse.status, 401);
+const debugBodyText = await debugResponse.text();
+const debugBody = JSON.parse(debugBodyText);
+assert.deepEqual(debugBody.debug, {
+  passwordHashRead:true,
+  passwordHashFormatValid:true,
+  sessionSecretRead:true,
+  sessionSecretFormatValid:true,
+  passwordHashFingerprint:expectedFingerprint,
+  passwordRead:true,
+  stage:"password_mismatch"
+});
+assert.equal(debugBodyText.includes(passwordHash), false);
+assert.equal(debugBodyText.includes(sessionSecret), false);
+assert.equal(debugBodyText.includes(debugPassword), false);
+
+const badSessionResponse = await login({
+  request:request("/api/ops/auth/login", { ip:"192.0.2.81", userAgent:"DebugSessionTest/1", method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ password }) }),
+  env:{ ...debugEnv, OPS_SESSION_SECRET:"not-a-valid-session-secret" }
+});
+assert.equal(badSessionResponse.status, 503);
+assert.deepEqual((await badSessionResponse.json()).debug, {
+  passwordHashRead:true,
+  passwordHashFormatValid:true,
+  sessionSecretRead:true,
+  sessionSecretFormatValid:false,
+  passwordHashFingerprint:expectedFingerprint,
+  passwordRead:true,
+  stage:"session_signing_failed"
+});
+
+const noDebugResponse = await login({
+  request:request("/api/ops/auth/login", { ip:"192.0.2.82", userAgent:"NoDebugTest/1", method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ password:`${password}-wrong-no-debug` }) }),
+  env
+});
+assert.equal(noDebugResponse.status, 401);
+const noDebugBodyText = await noDebugResponse.text();
+assert.equal(noDebugBodyText.includes("debug"), false);
+assert.equal(noDebugBodyText.includes("passwordHashFingerprint"), false);
+assert.equal(noDebugBodyText.includes(expectedFingerprint), false);
+
+const generated = spawnSync(process.execPath, ["scripts/generate-ops-secrets.mjs"], {
+  cwd:new URL("..", import.meta.url),
+  env:{ ...process.env, OPS_PASSWORD:"fingerprint-test-password" },
+  encoding:"utf8"
+});
+assert.equal(generated.status, 0);
+const generatedHash = (generated.stdout.match(/^OPS_PASSWORD_HASH=(.+)$/m) || [])[1];
+const generatedFingerprint = (generated.stdout.match(/^OPS_PASSWORD_HASH_FINGERPRINT=([0-9a-f]{12})$/m) || [])[1];
+assert.ok(generatedHash);
+assert.equal(generatedFingerprint, createHash("sha256").update(generatedHash, "utf8").digest("hex").slice(0, 12));
 
 const loginResponse = await login({ request:request("/api/ops/auth/login", { method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ password }) }), env });
 assert.equal(loginResponse.status, 200);
