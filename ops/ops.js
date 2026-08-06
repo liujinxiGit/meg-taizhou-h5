@@ -204,7 +204,7 @@
     }).catch(function (error) {
       if (error.status === 429) errorTarget.textContent = "尝试次数过多，请稍后再试";
       else if (error.status === 401) errorTarget.textContent = "密码不正确，请重新输入";
-      else errorTarget.textContent = "登录服务暂时不可用，请稍后重试";
+      else errorTarget.textContent = "后台认证暂时不可用，请联系管理员";
       passwordInput.select();
     }).then(function () { button.disabled = false; button.textContent = "登录"; });
   });

@@ -59,23 +59,48 @@ export function parsePasswordHash(encoded) {
   } catch { return null; }
 }
 
+function cryptoFailure(error, stage, cryptoErrorStage, sensitiveValues = []) {
+  const name = String(error && error.name || "Error").slice(0, 80);
+  let message = String(error && error.message || "Cryptographic operation failed");
+  for (const value of sensitiveValues) {
+    if (typeof value === "string" && value.length >= 4) message = message.split(value).join("[redacted]");
+  }
+  message = message.replace(/[A-Za-z0-9+/_-]{16,}={0,2}/g, "[redacted]").slice(0, 160);
+  return { ok:false, stage, cryptoErrorName:name, cryptoErrorMessage:message, cryptoErrorStage };
+}
+
 export async function verifyPasswordWithDiagnostics(password, encodedHash) {
   if (typeof password !== "string" || password.length < 1 || password.length > 512) {
     return { ok:false, stage:"password_input_invalid" };
   }
   const parsed = parsePasswordHash(encodedHash);
   if (!parsed) return { ok:false, stage:"password_hash_invalid" };
-  let material;
+  if (!Number.isSafeInteger(parsed.iterations) || !Number.isFinite(parsed.iterations) || parsed.iterations <= 0) {
+    return { ok:false, stage:"password_hash_invalid" };
+  }
+  const salt = new Uint8Array(parsed.salt);
+  let passwordKey;
   try {
-    material = await crypto.subtle.importKey("raw", encoder.encode(password), "PBKDF2", false, ["deriveBits"]);
-  } catch {
-    return { ok:false, stage:"pbkdf2_key_import_failed" };
+    passwordKey = await crypto.subtle.importKey(
+      "raw",
+      new TextEncoder().encode(password),
+      { name:"PBKDF2" },
+      false,
+      ["deriveBits"]
+    );
+  } catch (error) {
+    return cryptoFailure(error, "pbkdf2_key_import_failed", "password_key_import_failed", [password, encodedHash]);
   }
   let derived;
   try {
-    derived = new Uint8Array(await crypto.subtle.deriveBits({ name:"PBKDF2", hash:"SHA-256", salt:parsed.salt, iterations:parsed.iterations }, material, 256));
-  } catch {
-    return { ok:false, stage:"pbkdf2_derivation_failed" };
+    derived = new Uint8Array(await crypto.subtle.deriveBits({
+      name:"PBKDF2",
+      hash:"SHA-256",
+      salt,
+      iterations:parsed.iterations
+    }, passwordKey, 256));
+  } catch (error) {
+    return cryptoFailure(error, "pbkdf2_derivation_failed", "pbkdf2_derive_bits_failed", [password, encodedHash]);
   }
   return constantTimeEqual(derived, parsed.expected)
     ? { ok:true, stage:"verified" }
@@ -84,7 +109,7 @@ export async function verifyPasswordWithDiagnostics(password, encodedHash) {
 
 export async function verifyPassword(password, encodedHash) {
   const result = await verifyPasswordWithDiagnostics(password, encodedHash);
-  if (result.stage === "pbkdf2_key_import_failed" || result.stage === "pbkdf2_derivation_failed") {
+  if (result.cryptoErrorStage) {
     throw new Error(result.stage);
   }
   return result.ok;

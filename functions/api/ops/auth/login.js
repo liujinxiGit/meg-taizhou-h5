@@ -5,18 +5,24 @@ import {
   passwordHashFingerprint, sessionCookieHeader, verifyPasswordWithDiagnostics
 } from "../../../_shared/ops-auth.mjs";
 
-async function failureDiagnostics(env, stage) {
+async function failureDiagnostics(env, stage, cryptoFailure = null) {
   const diagnostic = inspectOpsAuthEnvironment(env);
-  return {
+  const result = {
     passwordHashRead:diagnostic.passwordHashRead,
     sessionSecretRead:diagnostic.sessionSecretRead,
     passwordHashFingerprint:diagnostic.passwordHashRead ? await passwordHashFingerprint(env.OPS_PASSWORD_HASH) : null,
     stage
   };
+  if (env.OPS_AUTH_DEBUG === "true" && cryptoFailure && cryptoFailure.cryptoErrorStage) {
+    result.cryptoErrorName = cryptoFailure.cryptoErrorName;
+    result.cryptoErrorMessage = cryptoFailure.cryptoErrorMessage;
+    result.cryptoErrorStage = cryptoFailure.cryptoErrorStage;
+  }
+  return result;
 }
 
-async function failureResponse(env, data, status, stage, headers = {}) {
-  return jsonResponse({ ...data, ...await failureDiagnostics(env, stage) }, status, headers);
+async function failureResponse(env, data, status, stage, headers = {}, cryptoFailure = null) {
+  return jsonResponse({ ...data, ...await failureDiagnostics(env, stage, cryptoFailure) }, status, headers);
 }
 
 export async function onRequestPost({ request, env }) {
@@ -34,6 +40,16 @@ export async function onRequestPost({ request, env }) {
   const password = body && typeof body.password === "string" ? body.password : "";
   const verification = await verifyPasswordWithDiagnostics(password, env.OPS_PASSWORD_HASH);
   if (!verification.ok) {
+    if (verification.cryptoErrorStage) {
+      return failureResponse(
+        env,
+        { ok:false, error:"auth_configuration_error" },
+        503,
+        verification.stage,
+        {},
+        verification
+      );
+    }
     await recordLoginFailure(request);
     return failureResponse(env, { ok:false, error:"invalid_credentials" }, 401, verification.stage);
   }

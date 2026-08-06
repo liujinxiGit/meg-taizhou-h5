@@ -42,7 +42,13 @@ function request(path, options = {}) {
 }
 function cookieValue(setCookie) { return String(setCookie || "").split(";", 1)[0].split("=").slice(1).join("="); }
 
-assert.ok(parsePasswordHash(passwordHash));
+const parsedPasswordHash = parsePasswordHash(passwordHash);
+assert.ok(parsedPasswordHash);
+assert.ok(parsedPasswordHash.salt instanceof Uint8Array);
+assert.equal(parsedPasswordHash.salt.byteLength, 16);
+assert.equal(parsedPasswordHash.expected.byteLength, 32);
+assert.equal(parsedPasswordHash.iterations, 210000);
+assert.equal(parsePasswordHash(`pbkdf2_sha256$210000$not-standard-base64$also-invalid`), null);
 assert.equal(await verifyPassword(password, passwordHash), true);
 assert.equal(await verifyPassword(`${password}-wrong`, passwordHash), false);
 const expectedFingerprint = createHash("sha256").update(passwordHash, "utf8").digest("hex").slice(0, 12);
@@ -76,6 +82,64 @@ assert.deepEqual(debugBody, {
 assert.equal(debugBodyText.includes(passwordHash), false);
 assert.equal(debugBodyText.includes(sessionSecret), false);
 assert.equal(debugBodyText.includes(debugPassword), false);
+
+const subtlePrototype = Object.getPrototypeOf(crypto.subtle);
+const originalDeriveBits = subtlePrototype.deriveBits;
+subtlePrototype.deriveBits = async function () {
+  const error = new Error(`forced derivation failure for ${password}; ${passwordHash}`);
+  error.name = "OperationError";
+  throw error;
+};
+try {
+  const cryptoFailureResponse = await login({
+    request:request("/api/ops/auth/login", { ip:"192.0.2.83", userAgent:"CryptoFailureTest/1", method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ password }) }),
+    env
+  });
+  assert.equal(cryptoFailureResponse.status, 503);
+  const cryptoFailureText = await cryptoFailureResponse.text();
+  const cryptoFailureBody = JSON.parse(cryptoFailureText);
+  assert.equal(cryptoFailureBody.error, "auth_configuration_error");
+  assert.equal(cryptoFailureBody.stage, "pbkdf2_derivation_failed");
+  assert.equal("cryptoErrorName" in cryptoFailureBody, false);
+  assert.equal("cryptoErrorMessage" in cryptoFailureBody, false);
+  assert.equal("cryptoErrorStage" in cryptoFailureBody, false);
+
+  const cryptoDebugResponse = await login({
+    request:request("/api/ops/auth/login", { ip:"192.0.2.84", userAgent:"CryptoDebugTest/1", method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ password }) }),
+    env:{ ...env, OPS_AUTH_DEBUG:"true" }
+  });
+  assert.equal(cryptoDebugResponse.status, 503);
+  const cryptoDebugText = await cryptoDebugResponse.text();
+  const cryptoDebugBody = JSON.parse(cryptoDebugText);
+  assert.equal(cryptoDebugBody.error, "auth_configuration_error");
+  assert.equal(cryptoDebugBody.cryptoErrorName, "OperationError");
+  assert.equal(cryptoDebugBody.cryptoErrorStage, "pbkdf2_derive_bits_failed");
+  assert.ok(cryptoDebugBody.cryptoErrorMessage.length <= 160);
+  assert.equal(cryptoDebugText.includes(password), false);
+  assert.equal(cryptoDebugText.includes(passwordHash), false);
+  assert.equal(cryptoDebugText.includes(sessionSecret), false);
+  assert.equal(cryptoDebugText.includes("stack"), false);
+} finally {
+  subtlePrototype.deriveBits = originalDeriveBits;
+}
+
+const originalImportKey = subtlePrototype.importKey;
+subtlePrototype.importKey = async function () {
+  const error = new Error(`forced key import failure for ${password}`);
+  error.name = "DataError";
+  throw error;
+};
+try {
+  const importFailure = await verifyPasswordWithDiagnostics(password, passwordHash);
+  assert.equal(importFailure.ok, false);
+  assert.equal(importFailure.stage, "pbkdf2_key_import_failed");
+  assert.equal(importFailure.cryptoErrorName, "DataError");
+  assert.equal(importFailure.cryptoErrorStage, "password_key_import_failed");
+  assert.ok(importFailure.cryptoErrorMessage.length <= 160);
+  assert.equal(importFailure.cryptoErrorMessage.includes(password), false);
+} finally {
+  subtlePrototype.importKey = originalImportKey;
+}
 
 const badSessionResponse = await login({
   request:request("/api/ops/auth/login", { ip:"192.0.2.81", userAgent:"DebugSessionTest/1", method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ password }) }),
@@ -156,11 +220,17 @@ assert.equal(await getLoginFailureCount(request("/api/ops/auth/login", resetIden
 
 const opsHtml = readFileSync(new URL("../ops/index.html", import.meta.url), "utf8");
 const opsJs = readFileSync(new URL("../ops/ops.js", import.meta.url), "utf8");
+const opsAuthSource = readFileSync(new URL("../functions/_shared/ops-auth.mjs", import.meta.url), "utf8");
 const configs = ["../wrangler.toml", "../wrangler.ops.toml", "../ops/wrangler.toml"].map((path) => readFileSync(new URL(path, import.meta.url), "utf8")).join("\n");
 assert.match(opsHtml, /type="password"/);
 assert.match(opsHtml, /autocomplete="current-password"/);
 assert.match(opsJs, /\/api\/ops\/auth\/session/);
 assert.match(opsJs, /credentials:"same-origin"/);
+assert.match(opsJs, /后台认证暂时不可用，请联系管理员/);
+assert.match(opsAuthSource, /new TextEncoder\(\)\.encode\(password\)/);
+assert.match(opsAuthSource, /\{ name:"PBKDF2" \}/);
+assert.match(opsAuthSource, /salt:new Uint8Array|const salt = new Uint8Array/);
+assert.match(opsAuthSource, /}, passwordKey, 256\)/);
 assert.doesNotMatch(opsHtml + opsJs, /pbkdf2_sha256\$\d+\$/);
 assert.doesNotMatch(configs, /OPS_PASSWORD_HASH|OPS_SESSION_SECRET/);
 

@@ -43,7 +43,7 @@ meg-taizhou-h5/
 
 ## 内容和素材配置
 
-当前 H5 静态资源版本号为 `20260806-1`，Operations 静态资源版本号为 `20260806-3`。每次发布新版本时，统一更新对应 HTML 中 CSS/JS/图片的 `?v=` 与相关测试断言；H5 素材版本还需同步 `config.js` 的 `assetVersion`。
+当前 H5 静态资源版本号为 `20260806-1`，Operations 静态资源版本号为 `20260806-4`。每次发布新版本时，统一更新对应 HTML 中 CSS/JS/图片的 `?v=` 与相关测试断言；H5 素材版本还需同步 `config.js` 的 `assetVersion`。
 
 日常会修改的信息集中在 `config.js`；会员价格、店长名称、微信号和二维码直接写在 `index.html`，确保 JavaScript 未加载时仍可见：
 
@@ -138,7 +138,15 @@ pbkdf2_sha256$210000$saltBase64$hashBase64
 
 它使用 PBKDF2-HMAC-SHA-256、至少 16 字节随机 salt 和 32 字节输出。`OPS_SESSION_SECRET` 是 32 字节随机值的 base64url 编码。不要把脚本输出粘贴到 `wrangler.toml`、源码、README 或 Git 追踪文件。
 
-登录故障排查期间，登录 API 的失败响应会直接包含 `passwordHashFingerprint`、`stage`、`passwordHashRead` 和 `sessionSecretRead`。指纹是密码 Hash 的 12 位 SHA-256 前缀；响应不会返回 Secret、哈希、salt 或密码内容。`password_mismatch` 表示 Functions 已读取合法哈希且 PBKDF2 已成功执行，但当前输入密码与已部署哈希不对应；`session_signing_failed` 表示密码已通过、问题发生在 Session Secret 或签名阶段。排查完成后应恢复为不返回这些诊断字段。
+登录故障排查期间，登录 API 的失败响应会直接包含 `passwordHashFingerprint`、`stage`、`passwordHashRead` 和 `sessionSecretRead`。指纹是密码 Hash 的 12 位 SHA-256 前缀；响应不会返回 Secret、哈希、salt 或密码内容。若同时设置 `OPS_AUTH_DEBUG=true`，仅在 Web Crypto 抛出异常时额外返回截断至 160 字符的 `cryptoErrorName`、`cryptoErrorMessage` 和 `cryptoErrorStage`，不返回堆栈或加密输入。加密运算异常返回 HTTP `503` 与 `auth_configuration_error`，不会记为密码错误。`password_mismatch` 表示 PBKDF2 已成功执行但输入密码与 Hash 不对应；`session_signing_failed` 表示密码已通过、问题发生在 Session Secret 或签名阶段。排查完成后应恢复为不返回这些诊断字段。
+
+生产兼容运行时检查使用真实 Wrangler Pages/workerd 启动完整登录 Function：
+
+```bash
+node tests/wrangler-pages-pbkdf2-check.mjs
+```
+
+测试会临时生成无生产意义的凭据，验证默认 210000 次 PBKDF2、正确密码和错误密码分支，不读取或输出 Production Secret。
 
 ### 3. 本地开发
 
