@@ -51,7 +51,7 @@ export function parsePasswordHash(encoded) {
     const parts = String(encoded || "").split("$");
     if (parts.length !== 4 || parts[0] !== "pbkdf2_sha256") return null;
     const iterations = Number(parts[1]);
-    if (!Number.isSafeInteger(iterations) || iterations < 210000 || iterations > 2000000) return null;
+    if (!Number.isSafeInteger(iterations) || iterations < 100000 || iterations > 2000000) return null;
     const salt = base64ToBytes(parts[2]);
     const expected = base64ToBytes(parts[3]);
     if (salt.length < 16 || salt.length > 64 || expected.length !== 32) return null;

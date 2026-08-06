@@ -133,7 +133,7 @@ node scripts/generate-ops-secrets.mjs
 密码哈希格式为：
 
 ```text
-pbkdf2_sha256$210000$saltBase64$hashBase64
+pbkdf2_sha256$100000$saltBase64$hashBase64
 ```
 
 它使用 PBKDF2-HMAC-SHA-256、至少 16 字节随机 salt 和 32 字节输出。`OPS_SESSION_SECRET` 是 32 字节随机值的 base64url 编码。不要把脚本输出粘贴到 `wrangler.toml`、源码、README 或 Git 追踪文件。
@@ -146,7 +146,7 @@ pbkdf2_sha256$210000$saltBase64$hashBase64
 node tests/wrangler-pages-pbkdf2-check.mjs
 ```
 
-测试会临时生成无生产意义的凭据，验证默认 210000 次 PBKDF2、正确密码和错误密码分支，不读取或输出 Production Secret。
+测试会临时生成无生产意义的凭据，验证默认 100000 次 PBKDF2、正确密码和错误密码分支，不读取或输出 Production Secret。
 
 ### 3. 本地开发
 

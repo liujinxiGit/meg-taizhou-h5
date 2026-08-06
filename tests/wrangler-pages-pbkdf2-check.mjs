@@ -15,7 +15,7 @@ const generated = spawnSync(process.execPath, [join(projectRoot, "scripts/genera
 assert.equal(generated.status, 0, "secret generator must succeed");
 const passwordHash = (generated.stdout.match(/^OPS_PASSWORD_HASH=(.+)$/m) || [])[1];
 const sessionSecret = (generated.stdout.match(/^OPS_SESSION_SECRET=(.+)$/m) || [])[1];
-assert.ok(passwordHash && passwordHash.startsWith("pbkdf2_sha256$210000$"));
+assert.ok(passwordHash && passwordHash.startsWith("pbkdf2_sha256$100000$"));
 assert.ok(sessionSecret);
 
 const port = randomInt(18000, 28000);
@@ -79,7 +79,7 @@ try {
   const invalidBody = await invalidResponse.json();
   assert.equal(invalidBody.error, "invalid_credentials");
   assert.equal(invalidBody.stage, "password_mismatch");
-  console.log("wrangler-pages-pbkdf2-check: 210000 iterations passed in workerd");
+  console.log("wrangler-pages-pbkdf2-check: 100000 iterations passed in workerd");
 } finally {
   wrangler.kill("SIGTERM");
 }

@@ -1,7 +1,7 @@
 import { createHash, pbkdf2Sync, randomBytes } from "node:crypto";
 import { emitKeypressEvents } from "node:readline";
 
-const ITERATIONS = 210000;
+const ITERATIONS = 100000;
 
 function readHiddenPassword() {
   if (!process.stdin.isTTY || !process.stdout.isTTY || typeof process.stdin.setRawMode !== "function") {
