@@ -26,10 +26,10 @@ const checks = [
   ["Chinese titles and booking messages are present", ["自由训练体验周卡", "塑形私教体验课", "器械普拉提体验课", "拳击体验课", "想预约【自由训练体验周卡】。", "想预约【塑形私教体验课】。", "想预约【器械普拉提体验课】。", "想预约【拳击体验课】。", "预约编号："].every(text => app.includes(text))],
   ["English titles and booking messages are present", ["7-Day Open Gym Trial", "Personal Training Trial", "Reformer Pilates Trial", "Boxing Training Trial", "would like to book the 7-day Open Gym trial.", "would like to book the Personal Training trial.", "would like to book the Reformer Pilates trial.", "would like to book the Boxing Training trial.", "Booking reference:"].every(text => app.includes(text))],
   ["Clipboard fallback is present", app.includes('document.createElement("textarea")') && app.includes('document.execCommand("copy")')],
-  ["Copy success messages are exact", app.includes("已复制，添加店长微信后直接粘贴发送即可") && app.includes("Copied. Add the gym manager on WeChat and send the message.")],
+  ["Copy success messages identify Gym Manager Xu", app.includes("已复制，添加许店长微信后直接粘贴发送即可") && app.includes("Copied. Add Gym Manager Xu on WeChat and send the message.")],
   ["Anonymous booking reference is prepared before copy", app.includes("function prepareLead") && app.includes("/api/leads") && zh.includes('id="claimCode"') && en.includes('id="claimCode"')],
-  ["English root resources cannot resolve under /en/", en.includes('href="/styles.css?v=20260806-1"') && en.includes('src="/config.js?v=20260806-1"') && en.includes('src="/app.js?v=20260806-1"') && !/src="(?:\.\/)?app\.js/.test(en)],
-  ["Scripts defer until the DOM is ready", /<script defer src="\/config\.js\?v=20260806-1"><\/script><script defer src="\/app\.js\?v=20260806-1"><\/script>/.test(zh) && /<script defer src="\/config\.js\?v=20260806-1"><\/script><script defer src="\/app\.js\?v=20260806-1"><\/script>/.test(en) && app.includes('document.addEventListener("DOMContentLoaded", init')],
+  ["English root resources cannot resolve under /en/", en.includes('href="/styles.css?v=20260806-2"') && en.includes('src="/config.js?v=20260806-2"') && en.includes('src="/app.js?v=20260806-2"') && !/src="(?:\.\/)?app\.js/.test(en)],
+  ["Scripts defer until the DOM is ready", /<script defer src="\/config\.js\?v=20260806-2"><\/script><script defer src="\/app\.js\?v=20260806-2"><\/script>/.test(zh) && /<script defer src="\/config\.js\?v=20260806-2"><\/script><script defer src="\/app\.js\?v=20260806-2"><\/script>/.test(en) && app.includes('document.addEventListener("DOMContentLoaded", init')],
   ["App tolerates a missing config object", app.includes("root.MEG_CONFIG || {}")],
   ["English membership inquiry uses delegated interaction", en.includes("js-open-gym-membership") && app.includes('target.closest(".js-open-gym-membership")')]
 ];

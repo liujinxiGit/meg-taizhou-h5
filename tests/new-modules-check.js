@@ -21,8 +21,8 @@ const isTransparentPng = filename => {
 
 const checks = [
   ["1. Nine specialist programs exist on both pages", [zh, en].every(html => count(html, /class="program-tab js-program-toggle"/g) === 9 && programIds.every(id => html.includes(`data-program="${id}"`) && html.includes(`data-program-detail="${id}"`)))],
-  ["2. Physical Reconditioning replaces the old public term", zh.includes("物理重建") && !zh.includes("运动康复") && !en.includes("Return-to-Training")],
-  ["3. English uses Physical Reconditioning", en.includes("Physical Reconditioning") && !/Medical Rehabilitation|Physical Therapy|Injury Treatment|Pain Treatment|Rehabilitation Treatment/i.test(en)],
+  ["2. Movement Rehabilitation replaces the old public term", zh.includes("运动功能重建") && !zh.includes("物理重建") && !zh.includes("运动康复")],
+  ["3. English uses Movement Rehabilitation", en.includes("Movement Rehabilitation") && !en.includes("Physical Reconditioning") && !/Medical Rehabilitation|Physical Therapy|Injury Treatment|Pain Treatment|Rehabilitation Treatment/i.test(en)],
   ["4. Boxing Training exists", zh.includes("拳击训练") && en.includes("Boxing Training") && programIds.includes("boxing")],
   ["5. Youth age is 5–12", zh.includes("5—12岁") && en.includes("aged 5–12")],
   ["6. Specialist personal training is one-on-one and by appointment", ["posture", "physical-reconditioning", "weightlifting", "functional", "mobility-recovery", "sports-performance", "youth-fitness", "boxing"].every(id => block(zh, "program-detail", id).includes("预约制一对一私教") && block(en, "program-detail", id).includes("One-on-one Personal Training") && block(en, "program-detail", id).includes("Advance booking required"))],

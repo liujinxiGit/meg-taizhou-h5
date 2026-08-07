@@ -12,5 +12,6 @@
   test("localStorage 数据序列化",function(){equal(u.serializeStorage([{event:"page_view"}]),'[{"event":"page_view"}]');});
   test("规则展开状态",function(){equal(u.rulesExpanded(false),true);equal(u.rulesExpanded(true),false);});
   test("图片缺失 fallback",function(){var box=document.createElement("div"),img=document.createElement("img");box.appendChild(img);equal(u.imageFallback(img),true);equal(box.classList.contains("is-fallback"),true);});
+  test("图片三级加载策略",function(){equal(u.imageLoadingPlan("hero",0,true).tier,"critical");equal(u.imageLoadingPlan("space",0,true).tier,"near");equal(u.imageLoadingPlan("folded-gallery",0,false).tier,"deferred");equal(u.imageLoadingPlan("later",0,true).tier,"later");});
   var passed=results.filter(function(x){return x.ok;}).length;document.getElementById("summary").textContent=passed+" / "+results.length+" 项通过";document.getElementById("summary").className=passed===results.length?"pass":"fail";document.getElementById("results").innerHTML=results.map(function(x){return '<li class="'+(x.ok?'pass':'fail')+'">'+(x.ok?'✓ ':'✗ ')+x.name+(x.error?'：'+x.error:'')+'</li>';}).join('');
 })();

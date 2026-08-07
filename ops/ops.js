@@ -2,7 +2,7 @@
   "use strict";
   var STATUS_ORDER = ["new", "wechat_added", "booked", "visited", "converted"];
   var STATUS_LABELS = { new:"新线索", wechat_added:"已加微信", booked:"已预约", visited:"已到店", converted:"已成交", duplicate:"重复", invalid:"无效", closed:"已关闭" };
-  var SERVICE_LABELS = { open_gym:"自由训练", personal_training:"塑形私教", reformer_pilates:"器械普拉提", posture_training:"体态纠正", physical_reconditioning:"物理重建", weightlifting:"举重训练", functional_training:"功能性训练", mobility_recovery:"拉伸恢复", sports_performance:"运动表现", boxing:"拳击训练", youth_fitness:"青少儿体适能", group_classes:"团体课程", other:"其他" };
+  var SERVICE_LABELS = { open_gym:"自由训练", personal_training:"塑形私教", reformer_pilates:"器械普拉提", posture_training:"体态纠正", physical_reconditioning:"运动功能重建", weightlifting:"举重训练", functional_training:"功能性训练", mobility_recovery:"拉伸恢复", sports_performance:"运动表现", boxing:"拳击训练", youth_fitness:"青少儿体适能", group_classes:"团体课程", other:"其他" };
   var STAGE_LABELS = { claim_opened:"已打开预约", message_copied:"已复制话术", wechat_qr_viewed:"已查看二维码" };
 
   function buildQuery(filters, page, pageSize) {

@@ -49,7 +49,7 @@
 
   var CONSULTATION_CONTENT = {
     "zh-CN": {
-      "physical-reconditioning": { title:"物理重建咨询", message:"你好，我从MEG FITNESS泰州路店活动网页进入，想咨询【物理重建】课程。" },
+      "physical-reconditioning": { title:"运动功能重建咨询", message:"你好，我从MEG FITNESS泰州路店活动网页进入，想咨询【运动功能重建】课程。" },
       weightlifting: { title:"举重训练咨询", message:"你好，我从MEG FITNESS泰州路店活动网页进入，想咨询【举重训练】课程。" },
       "sports-performance": { title:"运动表现咨询", message:"你好，我从MEG FITNESS泰州路店活动网页进入，想咨询【运动表现】课程。" },
       boxing: { title:"拳击训练咨询", message:"你好，我从MEG FITNESS泰州路店活动网页进入，想咨询【拳击训练】课程。" },
@@ -58,7 +58,7 @@
       recovery: { title:"拉伸恢复咨询", message:"你好，我从MEG FITNESS泰州路店活动网页进入，想咨询【拉伸恢复】课程。" }
     },
     en: {
-      "physical-reconditioning": { title:"Physical Reconditioning Inquiry", message:"Hi, I found MEG FITNESS Taizhou Road through the website. I would like to ask about the Physical Reconditioning sessions." },
+      "physical-reconditioning": { title:"Movement Rehabilitation Inquiry", message:"Hi, I found MEG FITNESS Taizhou Road through the website. I would like to ask about the Movement Rehabilitation sessions." },
       weightlifting: { title:"Olympic Weightlifting Inquiry", message:"Hi, I found MEG FITNESS Taizhou Road through the website. I would like to ask about the Olympic Weightlifting sessions." },
       "sports-performance": { title:"Sports Performance Inquiry", message:"Hi, I found MEG FITNESS Taizhou Road through the website. I would like to ask about the Sports Performance sessions." },
       boxing: { title:"Boxing Training Inquiry", message:"Hi, I found MEG FITNESS Taizhou Road through the website. I would like to ask about the Boxing Training sessions." },
@@ -117,6 +117,12 @@
     } catch (error) {}
     return "";
   }
+  function imageLoadingPlan(group, index, expanded) {
+    if (group === "hero") return { tier:"critical", loading:"eager", fetchPriority:"high", rootMargin:"0px" };
+    if (group === "space" && Number(index) < 4) return { tier:"near", loading:"lazy", fetchPriority:"auto", rootMargin:"1000px" };
+    if (group === "folded-gallery" && !expanded) return { tier:"deferred", loading:"lazy", fetchPriority:"low", rootMargin:"0px" };
+    return { tier:"later", loading:"lazy", fetchPriority:"low", rootMargin:"650px" };
+  }
 
   root.MEG_EXPERIENCE_CONTENT = EXPERIENCE_CONTENT;
   root.MEG_UTILS = {
@@ -132,7 +138,8 @@
     mapLeadService:mapLeadService,
     buildBookingMessage:buildBookingMessage,
     isAnonymousClientId:isAnonymousClientId,
-    createAnonymousClientId:createAnonymousClientId
+    createAnonymousClientId:createAnonymousClientId,
+    imageLoadingPlan:imageLoadingPlan
   };
 
   if (!root.document) return;
@@ -238,6 +245,9 @@
     var imagePreviewImg = document.getElementById("imagePreviewImg");
     var toast = document.getElementById("toast");
     var mobileCtaBar = document.querySelector(".mobile-cta-bar");
+    var sectionNav = document.querySelector("[data-section-nav]");
+    var sectionMenu = document.getElementById("sectionMenu");
+    var sectionMenuButton = document.querySelector("[data-open-section-menu]");
     var touchStartY = 0;
     var previewTouchStartY = 0;
     var savedScrollY = 0;
@@ -261,7 +271,7 @@
     }
 
     function unlockPage() {
-      if ((modal && modal.classList.contains("open")) || (imagePreview && imagePreview.classList.contains("open"))) return;
+      if ((modal && modal.classList.contains("open")) || (imagePreview && imagePreview.classList.contains("open")) || (sectionMenu && sectionMenu.classList.contains("open"))) return;
       body.classList.remove("no-scroll");
       body.style.top = "";
       root.scrollTo(0, savedScrollY);
@@ -270,6 +280,10 @@
     var coachSection = document.querySelector('[data-config-section="coach"]');
     var locationsSection = document.querySelector('[data-config-section="locations"]');
     if (coachSection) coachSection.hidden = config.showCoachSection !== true;
+    document.querySelectorAll("[data-coach-id]").forEach(function (card) {
+      var coach = (config.coaches || []).find(function (item) { return item.id === card.dataset.coachId; });
+      card.hidden = Boolean(coach && (coach.active === false || coach.enabled === false));
+    });
     if (locationsSection) locationsSection.hidden = config.showLocationsSection === false;
 
     function experienceEvent(experience) {
@@ -358,7 +372,7 @@
         currentClaimMessage = buildBookingMessage(baseMessage, "", normalizedLanguage);
         setText("messageText", currentClaimMessage);
         setClaimLoading(false, normalizedLanguage === "en"
-          ? "The reference could not be generated. You can still add the gym manager on WeChat and book directly."
+          ? "The reference could not be generated. You can still add Gym Manager Xu on WeChat and book directly."
           : "预约编号暂时生成失败，你仍可直接添加微信预约。");
       });
     }
@@ -448,6 +462,91 @@
       unlockPage();
     }
 
+    function openSectionMenu() {
+      if (!sectionMenu || !sectionMenuButton) return;
+      if (modal && modal.classList.contains("open")) closeModal();
+      if (imagePreview && imagePreview.classList.contains("open")) closeImagePreview();
+      sectionMenu.hidden = false;
+      sectionMenu.classList.add("open");
+      sectionMenu.setAttribute("aria-hidden", "false");
+      sectionMenuButton.setAttribute("aria-expanded", "true");
+      lockPage();
+      var firstLink = sectionMenu.querySelector("a");
+      if (firstLink) root.setTimeout(function () { firstLink.focus(); }, 40);
+    }
+
+    function closeSectionMenu() {
+      if (!sectionMenu || !sectionMenuButton) return;
+      sectionMenu.classList.remove("open");
+      sectionMenu.setAttribute("aria-hidden", "true");
+      sectionMenu.hidden = true;
+      sectionMenuButton.setAttribute("aria-expanded", "false");
+      unlockPage();
+    }
+
+    function scrollToSection(selector) {
+      var section = selector ? document.querySelector(selector) : null;
+      if (!section) return;
+      var reduced = root.matchMedia && root.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      section.scrollIntoView({ behavior:reduced ? "auto" : "smooth", block:"start" });
+    }
+
+    function revealDeferredGallery(container) {
+      if (!container) return;
+      container.querySelectorAll("img[data-progressive-src]").forEach(function (image) {
+        image.src = image.dataset.progressiveSrc;
+        image.removeAttribute("data-progressive-src");
+      });
+    }
+
+    function prepareProgressiveImages() {
+      var spaceImages = Array.prototype.slice.call(document.querySelectorAll("#space [data-gallery-index]"));
+      spaceImages.forEach(function (image, index) {
+        var plan = imageLoadingPlan("space", index, true);
+        image.dataset.imageTier = plan.tier;
+        image.loading = plan.loading;
+        image.decoding = "async";
+        image.fetchPriority = plan.fetchPriority;
+      });
+      document.querySelectorAll(".brand-location-detail img").forEach(function (image) {
+        var plan = imageLoadingPlan("folded-gallery", 0, false);
+        image.dataset.imageTier = plan.tier;
+        if (image.getAttribute("src")) {
+          image.dataset.progressiveSrc = image.getAttribute("src");
+          image.removeAttribute("src");
+        }
+        image.loading = plan.loading;
+        image.decoding = "async";
+      });
+
+      var prewarmed = false;
+      function prewarm() {
+        if (prewarmed) return;
+        prewarmed = true;
+        spaceImages.slice(0, 4).forEach(function (image, index) {
+          var load = function () {
+            var warmImage = new root.Image();
+            warmImage.decoding = "async";
+            warmImage.src = image.currentSrc || image.src;
+          };
+          root.setTimeout(load, index * 140);
+        });
+      }
+      var trialSection = document.getElementById("trial-options");
+      if (trialSection && "IntersectionObserver" in root) {
+        var warmObserver = new root.IntersectionObserver(function (entries) {
+          if (entries.some(function (entry) { return entry.isIntersecting; })) {
+            prewarm();
+            warmObserver.disconnect();
+          }
+        }, { rootMargin:imageLoadingPlan("space", 0, true).rootMargin + " 0px", threshold:0 });
+        warmObserver.observe(trialSection);
+      }
+      if (typeof root.requestIdleCallback === "function") root.requestIdleCallback(prewarm, { timeout:1400 });
+      else root.setTimeout(prewarm, 900);
+    }
+    prepareProgressiveImages();
+
     async function copyText(value) {
       if (!value) return false;
       try {
@@ -474,8 +573,8 @@
       if (!currentClaimMessage) return;
       copyText(currentClaimMessage).then(function (copied) {
         var success = pageLanguage === "en"
-          ? "Copied. Add the gym manager on WeChat and send the message."
-          : "已复制，添加店长微信后直接粘贴发送即可";
+          ? "Copied. Add Gym Manager Xu on WeChat and send the message."
+          : "已复制，添加许店长微信后直接粘贴发送即可";
         var failure = body.dataset.copyFailure || (pageLanguage === "en" ? "Copy failed. Please copy the message manually." : "复制失败，请长按上方话术手动复制。");
         setText("copyStatus", copied ? success : failure);
         showToast(copied ? success : failure);
@@ -508,6 +607,27 @@
         return;
       }
 
+      if (target.closest("[data-open-section-menu]")) {
+        event.preventDefault();
+        openSectionMenu();
+        return;
+      }
+
+      if (target.closest("[data-close-section-menu]")) {
+        event.preventDefault();
+        closeSectionMenu();
+        return;
+      }
+
+      var sectionLink = target.closest(".section-nav a, .section-menu a");
+      if (sectionLink) {
+        event.preventDefault();
+        var sectionTarget = sectionLink.getAttribute("href");
+        if (sectionMenu && sectionMenu.classList.contains("open")) closeSectionMenu();
+        root.setTimeout(function () { scrollToSection(sectionTarget); }, 0);
+        return;
+      }
+
       var scrollButton = target.closest(".js-scroll-to-trials");
       if (scrollButton) {
         event.preventDefault();
@@ -519,13 +639,27 @@
           return;
         }
         var trialOptions = document.querySelector("#trial-options");
-        if (trialOptions) trialOptions.scrollIntoView({ behavior:"smooth" });
+        if (trialOptions) scrollToSection("#trial-options");
         return;
       }
 
       if (target.closest(".js-open-gym-membership")) {
         event.preventDefault();
         openMembershipModal();
+        return;
+      }
+
+      var moreProgramsButton = target.closest("[data-toggle-more-programs]");
+      if (moreProgramsButton) {
+        event.preventDefault();
+        var moreExpanded = moreProgramsButton.getAttribute("aria-expanded") !== "true";
+        moreProgramsButton.setAttribute("aria-expanded", String(moreExpanded));
+        moreProgramsButton.textContent = moreExpanded ? moreProgramsButton.dataset.collapseLabel : moreProgramsButton.dataset.expandLabel;
+        moreProgramsButton.closest(".programs-section").querySelectorAll("[data-more-programs]").forEach(function (panel) { panel.hidden = !moreExpanded; });
+        if (!moreExpanded) {
+          document.querySelectorAll(".js-program-toggle").forEach(function (button) { button.classList.remove("active"); button.setAttribute("aria-expanded", "false"); });
+          document.querySelectorAll("[data-program-detail]").forEach(function (detail) { detail.hidden = true; });
+        }
         return;
       }
 
@@ -609,6 +743,7 @@
         var locationExpanded = locationToggle.getAttribute("aria-expanded") !== "true";
         locationToggle.setAttribute("aria-expanded", String(locationExpanded));
         if (locationDetails) locationDetails.hidden = !locationExpanded;
+        if (locationExpanded) revealDeferredGallery(locationDetails);
         locationToggle.textContent = locationExpanded
           ? (locationToggle.dataset.collapseLabel || "收起门店详情")
           : (locationToggle.dataset.expandLabel || "查看门店详情");
@@ -659,7 +794,7 @@
         return;
       }
 
-      var copyWechatButton = target.closest("#copyWechatButton");
+      var copyWechatButton = target.closest("#copyWechatButton, [data-copy-manager-wechat]");
       if (copyWechatButton) {
         event.preventDefault();
         copyText(copyWechatButton.dataset.wechat || "13101839816").then(function (copied) {
@@ -685,8 +820,9 @@
 
     document.addEventListener("keydown", function (event) {
       if (event.key === "Escape") {
-        closeModal();
-        closeImagePreview();
+        if (modal && modal.classList.contains("open")) closeModal();
+        if (imagePreview && imagePreview.classList.contains("open")) closeImagePreview();
+        if (sectionMenu && sectionMenu.classList.contains("open")) closeSectionMenu();
       }
     });
     if (modalSheet) {
@@ -766,7 +902,7 @@
 
     var finalCta = document.querySelector(".final-cta");
     var heroSection = document.querySelector(".hero");
-    if (mobileCtaBar && finalCta && heroSection && "IntersectionObserver" in root) {
+    if (finalCta && heroSection && "IntersectionObserver" in root) {
       var hiddenCtaTargets = [];
       var ctaObserver = new root.IntersectionObserver(function (entries) {
         entries.forEach(function (entry) {
@@ -774,17 +910,58 @@
           if (entry.isIntersecting && index === -1) hiddenCtaTargets.push(entry.target);
           if (!entry.isIntersecting && index !== -1) hiddenCtaTargets.splice(index, 1);
         });
-        mobileCtaBar.classList.toggle("is-hidden", hiddenCtaTargets.length > 0);
+        var hidden = hiddenCtaTargets.length > 0;
+        if (mobileCtaBar) mobileCtaBar.classList.toggle("is-hidden", hidden);
+        if (sectionNav) sectionNav.classList.toggle("is-visible", !hidden);
+        if (sectionMenuButton) sectionMenuButton.classList.toggle("is-visible", !hidden);
       }, { threshold:0.08 });
       ctaObserver.observe(heroSection);
       ctaObserver.observe(finalCta);
     }
 
+    var navSections = Array.prototype.slice.call(document.querySelectorAll("[data-nav-section]"));
+    if (navSections.length) {
+      var navFrame = 0;
+      function updateActiveSection() {
+        navFrame = 0;
+        var marker = (root.innerHeight || 800) * 0.32;
+        var activeSection = navSections[0];
+        navSections.forEach(function (section) {
+          var rect = section.getBoundingClientRect();
+          if (rect.top <= marker && rect.bottom > marker) activeSection = section;
+        });
+        var activeId = activeSection.id;
+        document.querySelectorAll('.section-nav a, .section-menu a').forEach(function (link) {
+          var active = link.getAttribute("href") === "#" + activeId;
+          link.classList.toggle("active", active);
+          if (active) link.setAttribute("aria-current", "location");
+          else link.removeAttribute("aria-current");
+        });
+      }
+      function requestActiveSectionUpdate() {
+        if (!navFrame) navFrame = root.requestAnimationFrame(updateActiveSection);
+      }
+      if ("IntersectionObserver" in root) {
+        var navObserver = new root.IntersectionObserver(requestActiveSectionUpdate, { rootMargin:"-20% 0px -65%", threshold:[0, 0.15, 0.5] });
+        navSections.forEach(function (section) { navObserver.observe(section); });
+      }
+      root.addEventListener("scroll", requestActiveSectionUpdate, { passive:true });
+      root.addEventListener("resize", requestActiveSectionUpdate, { passive:true });
+      updateActiveSection();
+    }
+
     if (expired) {
       document.querySelectorAll(".js-claim-experience").forEach(function (button) { button.disabled = true; });
-      var endedMessage = document.getElementById("endedMessage");
       var deadlineCard = document.querySelector(".deadline-card");
-      if (endedMessage) endedMessage.hidden = false;
+      var trialWrap = document.querySelector("#trial-options .wrap");
+      if (trialWrap && !document.getElementById("endedMessage")) {
+        var endedMessage = document.createElement("p");
+        endedMessage.id = "endedMessage";
+        endedMessage.className = "ended";
+        endedMessage.setAttribute("role", "status");
+        endedMessage.textContent = pageLanguage === "en" ? "This opening trial offer has ended." : "本期开业免费体验领取已结束。";
+        trialWrap.appendChild(endedMessage);
+      }
       if (deadlineCard) deadlineCard.classList.add("expired");
     }
 

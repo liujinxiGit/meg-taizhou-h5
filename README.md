@@ -75,7 +75,7 @@ meg-taizhou-h5/
 
 - `assets/location-pac.webp`：已使用PAC店商场门面实拍。
 - `assets/location-wuding.webp`：已使用武定路店门头实拍。
-- `assets/location-taizhou.webp`
+- `assets/hero.webp`
 
 PAC店另外八张实拍已经放入详情相册，包含商场门面、力量器械、综合训练架、有氧设备、划船机、拳击装备、补给区和洗手区。武定路店另外五张实拍也已放入详情相册。
 

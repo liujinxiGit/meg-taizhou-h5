@@ -18,7 +18,7 @@ const checks = [
   ["6. Bottom CTA is mobile-only", css.includes(".mobile-cta-bar{display:none}") && css.includes("@media(max-width:767px)") && css.includes(".mobile-cta-bar{position:fixed") && css.includes("@media(min-width:768px){.mobile-cta-bar{display:none}")],
   ["7. Claim dialog is a mobile bottom sheet", mobileCss.includes(".modal-sheet{max-height:85vh;max-height:85dvh") && css.includes(".modal-sheet{position:absolute;bottom:0")],
   ["8. Dialog locks and restores page scroll", app.includes("function lockPage()") && app.includes("function unlockPage()") && app.includes("root.scrollTo(0, savedScrollY)")],
-  ["9. Bilingual toast messages exist", ["已复制，添加店长微信后直接粘贴发送即可", "Copied. Add the gym manager on WeChat and send the message.", "地址已复制", "Address Copied", "微信号已复制", "WeChat ID Copied"].every(text => app.includes(text))],
+  ["9. Bilingual toast messages exist", ["已复制，添加许店长微信后直接粘贴发送即可", "Copied. Add Gym Manager Xu on WeChat and send the message.", "地址已复制", "Address Copied", "微信号已复制", "WeChat ID Copied"].every(text => app.includes(text))],
   ["10. QR images remain ordinary long-pressable images", [zh, en].every(html => /<img[^>]+id="modalQr"[^>]+manager-wechat\.png/.test(html)) && !/modalQr[\s\S]{0,160}preventDefault/.test(app)],
   ["11. Clipboard textarea fallback remains", app.includes('document.createElement("textarea")') && app.includes('document.execCommand("copy")')],
   ["12. Horizontal overflow is guarded", /body\{[^}]*overflow-x:hidden/.test(css) && css.includes("overflow-wrap:anywhere")],
@@ -34,12 +34,12 @@ const checks = [
   ["22. HTML cache headers cover both languages", headers.includes("/index.html") && headers.includes("/en/index.html") && (headers.match(/no-cache, no-store, must-revalidate/g) || []).length >= 4],
   ["FAQ is bilingual and accordion-based", [zh, en].every(html => (html.match(/js-faq-toggle/g) || []).length === 6) && app.includes('target.closest(".js-faq-toggle")')],
   ["Non-hero images use lazy loading", [zh, en].every(html => (html.match(/loading="lazy"/g) || []).length >= 20)],
-  ["Hero image is preloaded", [zh, en].every(html => html.includes('rel="preload" as="image"') && html.includes("hero.webp?v=20260806-1"))],
+  ["Hero image is preloaded", [zh, en].every(html => html.includes('rel="preload" as="image"') && html.includes("hero.webp?v=20260806-2"))],
   ["Facility galleries include swipe hints", zh.includes("左右滑动查看更多门店图片") && en.includes("Swipe to view more gym photos")],
   ["Four main Chinese training modes are visible", zh.includes("四种训练方式") && zh.includes("左右滑动查看四种训练方式") && zh.includes("<span class=\"card-no\">04</span><h3>拳击训练</h3>")],
   ["Language switch stays fully visible on mobile", css.includes(".language-switch .language-current,.language-switch .language-full,.language-switch i{display:inline}") && css.includes(".language-switch .language-short{display:none}")],
   ["Language switch preserves source", app.includes('languageUrl.searchParams.set("source", source)')],
-  ["Static resources share cache version 20260806-1", [zh, en].every(html => html.includes("/styles.css?v=20260806-1") && html.includes("/app.js?v=20260806-1"))]
+  ["Static resources share cache version 20260806-2", [zh, en].every(html => html.includes("/styles.css?v=20260806-2") && html.includes("/app.js?v=20260806-2"))]
 ];
 
 checks.forEach(([name, passed]) => console.log(`${passed ? "PASS" : "FAIL"}: ${name}`));
