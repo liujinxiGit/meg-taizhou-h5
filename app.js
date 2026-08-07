@@ -499,7 +499,7 @@
         toggle.textContent = expanded ? toggle.dataset.collapseLabel : toggle.dataset.expandLabel;
       }
       section.querySelectorAll("[data-more-programs]").forEach(function (panel) {
-        panel.hidden = !expanded;
+        panel.hidden = panel.classList.contains("program-details") ? !expanded : false;
       });
     }
 

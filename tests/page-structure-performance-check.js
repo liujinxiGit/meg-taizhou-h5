@@ -38,11 +38,11 @@ const checks = [
   ["Folded store galleries defer their src until expansion", app.includes('image.dataset.progressiveSrc') && app.includes('image.removeAttribute("src")') && app.includes("revealDeferredGallery(locationDetails)")],
   ["Content media has stable CSS aspect ratios", css.includes("aspect-ratio:4/3") && css.includes("contain:layout paint")],
   ["Reduced motion covers scrolling navigation", css.includes("prefers-reduced-motion:reduce") && app.includes('behavior:reduced ? "auto" : "smooth"')],
-  ["More training projects are collapsed on both pages", [zh, en].every(html => html.includes("data-toggle-more-programs") && html.includes("data-more-programs hidden"))],
+  ["Training selectors stay available while details start collapsed", [zh, en].every(html => html.includes("data-toggle-more-programs") && /class="program-tabs"[^>]*data-more-programs(?![^>]*hidden)/.test(html) && /class="program-details"[^>]*data-more-programs hidden/.test(html))],
   ["Public terminology is fully updated", [zh, app, config, opsHtml, opsJs].every(source => !source.includes("物理重建")) && zh.includes("运动功能重建") && config.includes("运动功能重建") && !en.includes("Physical Reconditioning") && en.includes("Movement Rehabilitation")],
   ["Membership savings and totals are accurate", ["6个月合计¥1614", "省¥180", "12个月合计¥2988", "省¥600", "全年共省¥889", "折合约¥225/月"].every(text => zh.includes(text))],
   ["Coach data supports active records", config.includes("coaches:") && config.includes("active: true") && app.includes("coach.active === false")],
-  ["Static assets use the shared cache version", [zh, en].every(html => html.includes('/styles.css?v=20260806-2') && html.includes('/app.js?v=20260806-2')) && config.includes('assetVersion: "20260806-2"')]
+  ["Static assets use the current cache versions", [zh, en].every(html => html.includes('/styles.css?v=20260806-2') && html.includes('/app.js?v=20260808-1')) && config.includes('assetVersion: "20260806-2"')]
 ];
 
 checks.forEach(([name, passed]) => console.log(`${passed ? "PASS" : "FAIL"}: ${name}`));
