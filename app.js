@@ -491,6 +491,18 @@
       section.scrollIntoView({ behavior:reduced ? "auto" : "smooth", block:"start" });
     }
 
+    function setMoreProgramsExpanded(section, expanded) {
+      if (!section) return;
+      var toggle = section.querySelector("[data-toggle-more-programs]");
+      if (toggle) {
+        toggle.setAttribute("aria-expanded", String(expanded));
+        toggle.textContent = expanded ? toggle.dataset.collapseLabel : toggle.dataset.expandLabel;
+      }
+      section.querySelectorAll("[data-more-programs]").forEach(function (panel) {
+        panel.hidden = !expanded;
+      });
+    }
+
     function revealDeferredGallery(container) {
       if (!container) return;
       container.querySelectorAll("img[data-progressive-src]").forEach(function (image) {
@@ -653,13 +665,7 @@
       if (moreProgramsButton) {
         event.preventDefault();
         var moreExpanded = moreProgramsButton.getAttribute("aria-expanded") !== "true";
-        moreProgramsButton.setAttribute("aria-expanded", String(moreExpanded));
-        moreProgramsButton.textContent = moreExpanded ? moreProgramsButton.dataset.collapseLabel : moreProgramsButton.dataset.expandLabel;
-        moreProgramsButton.closest(".programs-section").querySelectorAll("[data-more-programs]").forEach(function (panel) { panel.hidden = !moreExpanded; });
-        if (!moreExpanded) {
-          document.querySelectorAll(".js-program-toggle").forEach(function (button) { button.classList.remove("active"); button.setAttribute("aria-expanded", "false"); });
-          document.querySelectorAll("[data-program-detail]").forEach(function (detail) { detail.hidden = true; });
-        }
+        setMoreProgramsExpanded(moreProgramsButton.closest(".programs-section"), moreExpanded);
         return;
       }
 
@@ -667,24 +673,27 @@
       if (programButton) {
         event.preventDefault();
         var programId = programButton.dataset.program;
-        var programButtons = document.querySelectorAll(".js-program-toggle");
-        var programDetails = document.querySelectorAll("[data-program-detail]");
-        var wasExpanded = programButton.getAttribute("aria-expanded") === "true";
+        var programsSection = programButton.closest(".programs-section");
+        var moreProgramsToggle = programsSection && programsSection.querySelector("[data-toggle-more-programs]");
+        if (moreProgramsToggle && moreProgramsToggle.getAttribute("aria-expanded") !== "true") {
+          setMoreProgramsExpanded(programsSection, true);
+        }
+        var programButtons = programsSection ? programsSection.querySelectorAll(".js-program-toggle") : [];
+        var programDetails = programsSection ? programsSection.querySelectorAll("[data-program-detail]") : [];
         programButtons.forEach(function (button) {
           button.setAttribute("aria-expanded", "false");
           button.classList.remove("active");
         });
         programDetails.forEach(function (detail) { detail.hidden = true; });
-        if (!wasExpanded) {
-          var programDetail = document.querySelector('[data-program-detail="' + programId + '"]');
-          programButton.setAttribute("aria-expanded", "true");
-          programButton.classList.add("active");
-          if (programDetail) {
-            programDetail.hidden = false;
-            root.setTimeout(function () {
-              if (root.matchMedia && root.matchMedia("(max-width: 767px)").matches) programDetail.scrollIntoView({ behavior:"smooth", block:"nearest" });
-            }, 40);
-          }
+        var programDetail = programsSection && programsSection.querySelector('[data-program-detail="' + programId + '"]');
+        programButton.setAttribute("aria-expanded", "true");
+        programButton.classList.add("active");
+        if (programDetail) {
+          programDetail.hidden = false;
+          root.setTimeout(function () {
+            var reduced = root.matchMedia && root.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            programDetail.scrollIntoView({ behavior:reduced ? "auto" : "smooth", block:"nearest" });
+          }, 40);
         }
         trackEvent("training_program_selected", { program:programId });
         return;
