@@ -39,7 +39,7 @@ const checks = [
   ["Four main Chinese training modes are visible", zh.includes("四种训练方式") && zh.includes("左右滑动查看四种训练方式") && zh.includes("<span class=\"card-no\">04</span><h3>拳击训练</h3>")],
   ["Language switch stays fully visible on mobile", css.includes(".language-switch .language-current,.language-switch .language-full,.language-switch i{display:inline}") && css.includes(".language-switch .language-short{display:none}")],
   ["Language switch preserves source", app.includes('languageUrl.searchParams.set("source", source)')],
-  ["Static resources use current cache versions", [zh, en].every(html => html.includes("/styles.css?v=20260806-2") && html.includes("/app.js?v=20260808-1"))]
+  ["Static resources use current cache versions", [zh, en].every(html => html.includes("/styles.css?v=20260809-1") && html.includes("/config.js?v=20260809-1") && html.includes("/app.js?v=20260809-1"))]
 ];
 
 checks.forEach(([name, passed]) => console.log(`${passed ? "PASS" : "FAIL"}: ${name}`));

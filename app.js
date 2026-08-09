@@ -123,6 +123,12 @@
     if (group === "folded-gallery" && !expanded) return { tier:"deferred", loading:"lazy", fetchPriority:"low", rootMargin:"0px" };
     return { tier:"later", loading:"lazy", fetchPriority:"low", rootMargin:"650px" };
   }
+  function normalizeWebUrl(value) {
+    try {
+      var url = new URL(String(value || "").trim());
+      return url.protocol === "https:" || url.protocol === "http:" ? url.href : "";
+    } catch (error) { return ""; }
+  }
 
   root.MEG_EXPERIENCE_CONTENT = EXPERIENCE_CONTENT;
   root.MEG_UTILS = {
@@ -139,7 +145,8 @@
     buildBookingMessage:buildBookingMessage,
     isAnonymousClientId:isAnonymousClientId,
     createAnonymousClientId:createAnonymousClientId,
-    imageLoadingPlan:imageLoadingPlan
+    imageLoadingPlan:imageLoadingPlan,
+    normalizeWebUrl:normalizeWebUrl
   };
 
   if (!root.document) return;
@@ -285,6 +292,25 @@
       card.hidden = Boolean(coach && (coach.active === false || coach.enabled === false));
     });
     if (locationsSection) locationsSection.hidden = config.showLocationsSection === false;
+
+    function renderDianpingLinks() {
+      document.querySelectorAll(".brand-location-card[data-location-id]").forEach(function (card) {
+        card.querySelectorAll(".dianping-link").forEach(function (link) { link.remove(); });
+        var location = (config.locations || []).find(function (item) { return item.id === card.dataset.locationId; });
+        var url = normalizeWebUrl(location && location.dianpingUrl);
+        var detailsToggle = card.querySelector(".js-location-toggle");
+        if (!url || !detailsToggle) return;
+        var link = document.createElement("a");
+        link.className = "dianping-link";
+        link.href = url;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.textContent = pageLanguage === "en" ? "View on Dianping ↗" : "大众点评查看门店 ↗";
+        detailsToggle.parentNode.insertBefore(link, detailsToggle);
+      });
+    }
+    root.MEG_UTILS.renderDianpingLinks = renderDianpingLinks;
+    renderDianpingLinks();
 
     function experienceEvent(experience) {
       if (experience === "open-gym") return pageLanguage === "en" ? "select_open_gym" : "select_free_training";
