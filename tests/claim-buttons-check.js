@@ -28,8 +28,8 @@ const checks = [
   ["Clipboard fallback is present", app.includes('document.createElement("textarea")') && app.includes('document.execCommand("copy")')],
   ["Copy success messages identify Gym Manager Xu", app.includes("已复制，添加许店长微信后直接粘贴发送即可") && app.includes("Copied. Add Gym Manager Xu on WeChat and send the message.")],
   ["Anonymous booking reference is prepared before copy", app.includes("function prepareLead") && app.includes("/api/leads") && zh.includes('id="claimCode"') && en.includes('id="claimCode"')],
-  ["English root resources cannot resolve under /en/", en.includes('href="/styles.css?v=20260818-1"') && en.includes('src="/config.js?v=20260818-1"') && en.includes('src="/app.js?v=20260818-1"') && !/src="(?:\.\/)?app\.js/.test(en)],
-  ["Scripts defer until the DOM is ready", /<script defer src="\/config\.js\?v=20260818-1"><\/script><script defer src="\/app\.js\?v=20260818-1"><\/script>/.test(zh) && /<script defer src="\/config\.js\?v=20260818-1"><\/script><script defer src="\/app\.js\?v=20260818-1"><\/script>/.test(en) && app.includes('document.addEventListener("DOMContentLoaded", init')],
+  ["English root resources cannot resolve under /en/", en.includes('href="/styles.css?v=20260818-2"') && en.includes('src="/config.js?v=20260818-2"') && en.includes('src="/app.js?v=20260818-2"') && !/src="(?:\.\/)?app\.js/.test(en)],
+  ["Scripts defer until the DOM is ready", /<script defer src="\/config\.js\?v=20260818-2"><\/script><script defer src="\/app\.js\?v=20260818-2"><\/script>/.test(zh) && /<script defer src="\/config\.js\?v=20260818-2"><\/script><script defer src="\/app\.js\?v=20260818-2"><\/script>/.test(en) && app.includes('document.addEventListener("DOMContentLoaded", init')],
   ["App tolerates a missing config object", app.includes("root.MEG_CONFIG || {}")],
   ["English membership inquiry uses delegated interaction", en.includes("js-open-gym-membership") && app.includes('target.closest(".js-open-gym-membership")')]
 ];

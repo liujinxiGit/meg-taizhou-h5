@@ -29,7 +29,7 @@ const checks = [
   ["7. Group classes are one-to-many", block(zh, "program-detail", "group-classes").includes("一对多") && block(en, "program-detail", "group-classes").includes("One-to-many")],
   ["8. Group classes are led by the Gym Manager", block(zh, "program-detail", "group-classes").includes("泰州路店店长") && block(en, "program-detail", "group-classes").includes("Taizhou Road Gym Manager")],
   ["9. Olympic Weightlifting is led by Coach Xu", block(zh, "program-detail", "weightlifting").includes("许教练") && block(en, "program-detail", "weightlifting").includes("Coach Xu")],
-  ["10. Coach Xu profile is complete", ["许教练", "从业10年", "社会体育指导与管理专业", "功能性训练", "塑形减脂", "举重训练"].every(value => zh.includes(value)) && ["Coach Xu", "10 years", "Social Sports Instruction and Management", "Functional Training", "Fat Loss &amp; Body Shaping", "Olympic Weightlifting"].every(value => en.includes(value))],
+  ["10. Coach Xu profile is complete", ["许宇祥", "从业10年", "社会体育指导与管理专业", "功能性训练", "塑形减脂", "举重训练"].every(value => zh.includes(value)) && ["Yuxiang Xu", "10 Years", "Social Sports Instruction and Management", "Functional Training", "Fat Loss &amp; Body Shaping", "Olympic Weightlifting"].every(value => en.includes(value))],
   ["11. Only the two verified certifications are shown", [zh, en].every(html => html.includes("NSCA-CSCS") && html.includes("SNC")) && !/\b(?:NASM|ACE|ACSM|ISSA|FMS)\b|CrossFit Level|Precision Nutrition/i.test(zh + en)],
   ["12. Coach service statistics are shown", zh.includes("300+") && zh.includes("12,000+") && en.includes("300+") && en.includes("12,000+")],
   ["13. Internal coach education role is shown", zh.includes("MEG内训课程总监") && en.includes("Director of Internal Coach Education at MEG FITNESS")],

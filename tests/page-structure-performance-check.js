@@ -42,7 +42,7 @@ const checks = [
   ["Public terminology is fully updated", [zh, app, config, opsHtml, opsJs].every(source => !source.includes("物理重建")) && zh.includes("运动功能重建") && config.includes("运动功能重建") && !en.includes("Physical Reconditioning") && en.includes("Movement Rehabilitation")],
   ["Membership savings and totals are accurate", ["全年共省¥889", "折合约¥225/月", "比单月购买12个月省¥889"].every(text => zh.includes(text))],
   ["Coach data supports active records", config.includes("coaches:") && config.includes("active: true") && app.includes("coach.active === false")],
-  ["Static assets use the current cache versions", [zh, en].every(html => html.includes('/styles.css?v=20260818-1') && html.includes('/config.js?v=20260818-1') && html.includes('/app.js?v=20260818-1')) && config.includes('assetVersion: "20260818-1"')]
+  ["Static assets use the current cache versions", [zh, en].every(html => html.includes('/styles.css?v=20260818-2') && html.includes('/config.js?v=20260818-2') && html.includes('/app.js?v=20260818-2')) && config.includes('assetVersion: "20260818-2"')]
 ];
 
 checks.forEach(([name, passed]) => console.log(`${passed ? "PASS" : "FAIL"}: ${name}`));

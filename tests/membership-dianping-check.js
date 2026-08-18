@@ -34,7 +34,7 @@ const checks = [
   ["Dianping links remain config-driven rather than hardcoded in HTML", !zh.includes("dianping-link") && !en.includes("dianping-link")],
   ["Dianping links use safe web URLs and new-page attributes", app.includes('link.target = "_blank"') && app.includes('link.rel = "noopener noreferrer"') && utilityWindow.MEG_UTILS.normalizeWebUrl("https://example.com/store") === "https://example.com/store" && utilityWindow.MEG_UTILS.normalizeWebUrl("dianping://shop/1") === ""],
   ["Dianping secondary action keeps a 44px touch target", /\.dianping-link\{[^}]*min-height:44px/.test(css)],
-  ["Both languages use the same cache version", [zh, en].every(html => ["styles.css", "config.js", "app.js"].every(asset => html.includes(`/${asset}?v=20260818-1`)))]
+  ["Both languages use the same cache version", [zh, en].every(html => ["styles.css", "config.js", "app.js"].every(asset => html.includes(`/${asset}?v=20260818-2`)))]
 ];
 
 checks.forEach(([name, passed]) => console.log(`${passed ? "PASS" : "FAIL"}: ${name}`));

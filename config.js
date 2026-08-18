@@ -1,5 +1,5 @@
 window.MEG_CONFIG = {
-  assetVersion: "20260818-1",
+  assetVersion: "20260818-2",
   brandName: "MEG FITNESS",
   storeName: "MEG FITNESS 泰州路店",
   brandProof: "10年专业健身品牌｜第3家门店",
@@ -92,17 +92,25 @@ window.MEG_CONFIG = {
       id: "manager",
       enabled: true,
       active: true,
-      name: "许教练",
-      englishName: "Coach Xu",
+      name: "许宇祥",
+      englishName: "Yuxiang Xu",
       role: "MEG FITNESS 泰州路店店长",
+      englishRole: "Gym Manager · MEG FITNESS Taizhou Road",
       photo: "assets/coach-xu.webp?v=20260806-2",
       specialties: ["功能性训练", "塑形减脂", "举重训练"],
-      yearsOfExperience: 10,
+      experience: "从业10年",
+      englishExperience: "10 Years of Coaching Experience",
+      stats: { clients: "300+", sessions: "12,000+" },
       education: "社会体育指导与管理专业",
-      certifications: ["NSCA-CSCS", "SNC国际运动营养咨询师"],
+      englishEducation: "Social Sports Instruction and Management",
+      certifications: ["NSCA-CSCS 美国国家体能协会认证体能训练专家", "SNC 国际运动营养咨询师"],
       brandRole: "MEG内训课程总监",
-      clients: "300+",
-      sessions: "12,000+"
+      positioningTags: ["科学进阶", "周期性训练", "个性化方案", "长期反馈"],
+      bio: [
+        "许宇祥教练从业10年，毕业于社会体育指导与管理专业，持有NSCA-CSCS及SNC国际运动营养咨询师认证。",
+        "长期专注于功能性训练、塑形减脂与举重训练，累计服务超过300名学员、授课超过12,000节，并担任MEG FITNESS内训课程总监，负责教练培训与课程标准建设。",
+        "教学中根据学员目标、身体状态和训练经验制定周期性训练方案，强调科学进阶、长期反馈与个体差异。管理与教学风格严谨细致，同时坚持以人为本，让训练真正服务于学员的目标。"
+      ]
     },
     {
       id: "suixin",
