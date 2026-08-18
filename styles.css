@@ -135,3 +135,21 @@ html{-webkit-text-size-adjust:100%;min-width:0}body.no-scroll{position:fixed;lef
   .claim-steps{margin:12px 0;padding-left:21px}
   .claim-steps li{margin-bottom:5px}
 }
+
+/* Three-coach team extension — 20260818-1 */
+.coach-list{align-items:stretch}
+.coach-card{display:flex;min-width:0;flex-direction:column}
+.coach-photo img{height:auto}
+.coach-card-body{display:flex;min-width:0;flex:1;flex-direction:column}
+.coach-cert-summary,.coach-positioning{color:var(--muted);font-size:12px;line-height:1.65}
+.coach-cert-summary{margin:14px 0 12px;font-weight:700}
+.coach-positioning{margin:16px 0}
+.coach-card-body>.js-coach-toggle{align-self:flex-start;margin-top:auto}
+.coach-role-badge{background:#e7eadf;color:var(--ink)}
+@media(min-width:680px){
+  .coach-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .coach-card{display:flex;grid-template-columns:none}
+  .coach-photo{height:auto}
+  .coach-photo img{height:auto;aspect-ratio:4/5}
+}
+@media(min-width:1100px){.coach-team-section .wrap{width:min(100% - 40px,1200px)}.coach-list{grid-template-columns:repeat(3,minmax(0,1fr))}}

@@ -1,5 +1,5 @@
 window.MEG_CONFIG = {
-  assetVersion: "20260806-2",
+  assetVersion: "20260818-1",
   brandName: "MEG FITNESS",
   storeName: "MEG FITNESS 泰州路店",
   brandProof: "10年专业健身品牌｜第3家门店",
@@ -103,6 +103,49 @@ window.MEG_CONFIG = {
       brandRole: "MEG内训课程总监",
       clients: "300+",
       sessions: "12,000+"
+    },
+    {
+      id: "suixin",
+      enabled: true,
+      active: true,
+      name: "隋心",
+      englishName: "Suixin",
+      role: "MEG FITNESS 私人教练",
+      englishRole: "MEG FITNESS Personal Trainer",
+      photo: "assets/coach-suixin.webp?v=20260818-1",
+      experience: "8年训练与教学经验",
+      englishExperience: "8 Years of Coaching Experience",
+      education: "休闲体育本科",
+      englishEducation: "Bachelor’s Degree in Leisure Sports",
+      certifications: ["NSCA-CPT 美国国家体能协会认证私人教练", "国家健身教练职业认证", "IBFA 国际身体阻力与体适能协会认证"],
+      specialties: ["力量训练", "功能性训练", "增肌减脂", "臀部塑形", "腰腹塑形"],
+      positioningTags: ["细致教学", "个性化训练", "塑形", "动作质量", "身体控制"],
+      bio: [
+        "拥有系统的体育专业背景与多年一线教学经验，擅长根据不同学员的身体基础、训练经历与目标制定个性化训练方案。",
+        "在力量与功能性训练基础上，尤其擅长臀部、腰腹等重点部位的塑形训练。从动作细节、发力方式到训练负荷进行针对性调整，在追求体型改变的同时兼顾力量、身体控制与运动能力。",
+        "教学细致、耐心，重视动作质量与训练反馈。通过持续的纠正、引导与训练进阶，帮助学员获得不只是“好看”，同时也更有力量、更好用的身体。"
+      ]
+    },
+    {
+      id: "majie",
+      enabled: true,
+      active: true,
+      name: "马杰",
+      englishName: "Majie",
+      role: "MEG FITNESS 私人教练",
+      englishRole: "MEG FITNESS Personal Trainer",
+      photo: "assets/coach-majie.webp?v=20260818-1",
+      experience: "8年一线教学经验",
+      englishExperience: "8 Years of Frontline Coaching Experience",
+      stats: { clients: "200+", sessions: "10,000+" },
+      certifications: ["NSCA-CPT 美国国家体能协会认证私人教练", "CBBA 中国健美协会认证教练"],
+      specialties: ["功能性训练", "增肌", "减脂", "腰腹塑形", "臀部塑形"],
+      positioningTags: ["一线授课经验", "功能性训练", "增肌减脂", "塑形", "长期进阶"],
+      bio: [
+        "拥有丰富的一对一私人训练经验，在长期高频授课中积累了针对不同训练基础、身体条件与目标人群的教学经验。",
+        "擅长将力量训练与功能性训练结合，从动作基础、训练强度到阶段进阶进行系统安排。针对增肌减脂以及腰腹、臀部塑形需求，不局限于单一部位训练，而是通过整体训练计划帮助学员获得更加协调、紧致且具有运动能力的身体。",
+        "教学注重实效、执行与长期进步。既能帮助初学者建立清晰的训练方式，也能根据有经验学员的实际表现持续调整训练内容，让每一个阶段都有明确的进步方向。"
+      ]
     }
   ],
   showLocationsSection: true,

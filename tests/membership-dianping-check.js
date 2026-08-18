@@ -30,11 +30,11 @@ const checks = [
   ["Chinese membership content is complete", ["次卡", "随买随用，适合偶尔训练", "首次月卡", "新客约5折体验", "年卡", "全年共省¥889", "折合约¥225/月", "比单月购买12个月省¥889"].every(value => zhPrices.includes(value))],
   ["English membership content is complete", ["Single Visit", "Pay as you go", "First Month", "New member trial", "First-time purchase only", "Annual Membership", "Save ¥889", "Approx. ¥225 / month"].every(value => enPrices.includes(value))],
   ["Removed memberships are absent from page DOM", removedZh.every(value => !zh.includes(value)) && removedEn.every(value => !en.includes(value))],
-  ["All three stores have empty Dianping configuration", ["pac", "wuding", "taizhou"].every(id => locations.some(location => location.id === id && location.dianpingUrl === ""))],
-  ["Empty configuration does not hardcode Dianping links in HTML", !zh.includes("dianping-link") && !en.includes("dianping-link")],
+  ["All three stores have HTTPS Dianping configuration", ["pac", "wuding", "taizhou"].every(id => locations.some(location => location.id === id && /^https:\/\/m\.dianping\.com\/shopshare\//.test(location.dianpingUrl)))],
+  ["Dianping links remain config-driven rather than hardcoded in HTML", !zh.includes("dianping-link") && !en.includes("dianping-link")],
   ["Dianping links use safe web URLs and new-page attributes", app.includes('link.target = "_blank"') && app.includes('link.rel = "noopener noreferrer"') && utilityWindow.MEG_UTILS.normalizeWebUrl("https://example.com/store") === "https://example.com/store" && utilityWindow.MEG_UTILS.normalizeWebUrl("dianping://shop/1") === ""],
   ["Dianping secondary action keeps a 44px touch target", /\.dianping-link\{[^}]*min-height:44px/.test(css)],
-  ["Both languages use the same cache version", [zh, en].every(html => ["styles.css", "config.js", "app.js"].every(asset => html.includes(`/${asset}?v=20260809-1`)))]
+  ["Both languages use the same cache version", [zh, en].every(html => ["styles.css", "config.js", "app.js"].every(asset => html.includes(`/${asset}?v=20260818-1`)))]
 ];
 
 checks.forEach(([name, passed]) => console.log(`${passed ? "PASS" : "FAIL"}: ${name}`));
