@@ -57,8 +57,8 @@ html{-webkit-text-size-adjust:100%;min-width:0}body.no-scroll{position:fixed;lef
 .section-menu-sheet nav a.active{border-color:#8fca28;background:var(--accent)}
 
 @media(min-width:1024px){
-  .section-nav{display:block}
-  .section-menu-button{display:none}
+  .section-menu-button{right:20px;bottom:20px}
+  .section-menu-sheet{right:20px;bottom:20px;left:auto;width:min(390px,calc(100% - 40px));border-radius:24px;padding-bottom:24px}
 }
 @media(max-width:767px){
   .training-cluster-section{padding-top:38px;padding-bottom:38px}
