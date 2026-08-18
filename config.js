@@ -113,17 +113,16 @@ window.MEG_CONFIG = {
       role: "MEG FITNESS 私人教练",
       englishRole: "MEG FITNESS Personal Trainer",
       photo: "assets/coach-suixin.webp?v=20260818-1",
-      experience: "8年训练与教学经验",
+      experience: "从业8年",
       englishExperience: "8 Years of Coaching Experience",
-      education: "休闲体育本科",
-      englishEducation: "Bachelor’s Degree in Leisure Sports",
-      certifications: ["NSCA-CPT 美国国家体能协会认证私人教练", "国家健身教练职业认证", "IBFA 国际身体阻力与体适能协会认证"],
-      specialties: ["力量训练", "功能性训练", "增肌减脂", "臀部塑形", "腰腹塑形"],
-      positioningTags: ["细致教学", "个性化训练", "塑形", "动作质量", "身体控制"],
+      stats: { clients: "200+", sessions: "10000+" },
+      certifications: ["NSCA-CPT 美国国家体能协会认证私人教练", "CBBA 中国健美协会认证教练"],
+      specialties: ["常规力量训练", "功能性训练", "增肌减脂", "腰腹塑形", "臀部塑形"],
+      positioningTags: ["细致教学", "个性化训练", "动作质量", "身体控制", "塑形"],
       bio: [
-        "拥有系统的体育专业背景与多年一线教学经验，擅长根据不同学员的身体基础、训练经历与目标制定个性化训练方案。",
-        "在力量与功能性训练基础上，尤其擅长臀部、腰腹等重点部位的塑形训练。从动作细节、发力方式到训练负荷进行针对性调整，在追求体型改变的同时兼顾力量、身体控制与运动能力。",
-        "教学细致、耐心，重视动作质量与训练反馈。通过持续的纠正、引导与训练进阶，帮助学员获得不只是“好看”，同时也更有力量、更好用的身体。"
+        "隋教练从业8年，拥有丰富的一对一私人训练经验，累计服务200+学员、授课10000+节。",
+        "擅长常规力量训练与功能性训练，并针对增肌减脂、臀部及腰腹塑形进行个性化训练设计。",
+        "教学风格细致，重视动作质量、发力方式与训练反馈。根据学员的身体基础和实际需求量身调整训练方案，通过持续的纠正与引导，在改善体型的同时提升力量、身体控制与运动能力。"
       ]
     },
     {
@@ -135,16 +134,16 @@ window.MEG_CONFIG = {
       role: "MEG FITNESS 私人教练",
       englishRole: "MEG FITNESS Personal Trainer",
       photo: "assets/coach-majie.webp?v=20260818-1",
-      experience: "8年一线教学经验",
-      englishExperience: "8 Years of Frontline Coaching Experience",
-      stats: { clients: "200+", sessions: "10,000+" },
-      certifications: ["NSCA-CPT 美国国家体能协会认证私人教练", "CBBA 中国健美协会认证教练"],
-      specialties: ["功能性训练", "增肌", "减脂", "腰腹塑形", "臀部塑形"],
-      positioningTags: ["一线授课经验", "功能性训练", "增肌减脂", "塑形", "长期进阶"],
+      education: "休闲体育本科",
+      englishEducation: "Bachelor's Degree in Leisure Sports",
+      certifications: ["国家健身教练职业认证", "IBFA 国际身体阻力与体适能协会认证"],
+      specialties: ["增肌", "减脂", "功能性训练"],
+      positioningTags: ["体育专业背景", "增肌", "减脂", "功能性训练", "循序渐进"],
       bio: [
-        "拥有丰富的一对一私人训练经验，在长期高频授课中积累了针对不同训练基础、身体条件与目标人群的教学经验。",
-        "擅长将力量训练与功能性训练结合，从动作基础、训练强度到阶段进阶进行系统安排。针对增肌减脂以及腰腹、臀部塑形需求，不局限于单一部位训练，而是通过整体训练计划帮助学员获得更加协调、紧致且具有运动能力的身体。",
-        "教学注重实效、执行与长期进步。既能帮助初学者建立清晰的训练方式，也能根据有经验学员的实际表现持续调整训练内容，让每一个阶段都有明确的进步方向。"
+        "拥有休闲体育本科专业背景，并持有国家健身教练职业认证及 IBFA 国际身体阻力与体适能协会认证。",
+        "擅长增肌、减脂与功能性训练，重视训练基础、动作质量以及不同阶段训练内容的合理安排。",
+        "根据学员的身体基础、训练经验和实际目标调整训练内容，在建立力量与运动能力的同时，让训练计划更具有针对性和可持续性。",
+        "教学强调循序渐进与实际执行，帮助学员建立清晰、稳定的训练方式，并随着能力提升持续调整训练难度与训练目标。"
       ]
     }
   ],
