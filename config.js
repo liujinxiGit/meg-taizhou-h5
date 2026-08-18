@@ -141,7 +141,7 @@ window.MEG_CONFIG = {
       englishName: "Majie",
       role: "MEG FITNESS 私人教练",
       englishRole: "MEG FITNESS Personal Trainer",
-      photo: "assets/coach-majie.webp?v=20260818-1",
+      photo: "assets/coach-majie.webp?v=20260818-2",
       education: "休闲体育本科",
       englishEducation: "Bachelor's Degree in Leisure Sports",
       certifications: ["国家健身教练职业认证", "IBFA 国际身体阻力与体适能协会认证"],
